@@ -19,6 +19,7 @@
 package com.intellij.idea.plugin.hybris.impex.assistance;
 
 import com.intellij.idea.plugin.hybris.common.services.CommonIdeaService;
+import com.intellij.idea.plugin.hybris.type.system.validation.impl.ItemsXMLChangedListener;
 import com.intellij.openapi.components.ApplicationComponent;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
@@ -50,6 +51,7 @@ public class ImpexHeaderHighlighterComponent implements ApplicationComponent {
     protected final ProjectManagerListener projectManagerListener = new ImpexProjectManagerListener();
     protected final PsiTreeChangeListener psiTreeChangeListener = new ImpexPsiTreeChangeListener();
     protected final EditorFactoryListener editorFactoryListener = new ImpexEditorFactoryListener();
+    protected final ItemsXMLChangedListener editorFactoryListener1 = new ItemsXMLChangedListener();
     protected final ImpexHeaderNameHighlighterService impexHeaderNameHighlighterService;
 
     public ImpexHeaderHighlighterComponent(final CommonIdeaService commonIdeaService,
@@ -65,6 +67,7 @@ public class ImpexHeaderHighlighterComponent implements ApplicationComponent {
     public void initComponent() {
         EditorFactory.getInstance().getEventMulticaster().addCaretListener(caretListener);
         ProjectManager.getInstance().addProjectManagerListener(this.projectManagerListener);
+        ProjectManager.getInstance().addProjectManagerListener(this.editorFactoryListener1);
     }
 
     @Override
