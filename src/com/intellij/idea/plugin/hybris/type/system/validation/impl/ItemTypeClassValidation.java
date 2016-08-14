@@ -34,6 +34,7 @@ public class ItemTypeClassValidation extends AbstractTSClassesValidation<ItemTyp
 
     private static final String MODEL_SUFFIX = "Model";
     private static final String FIELD_PREFIX = "_";
+    private static final String LOCALIZED_PREFIX = "localized";
 
     @Override
     public List<Attribute> getItemFields(@NotNull final ItemType item)
@@ -61,6 +62,11 @@ public class ItemTypeClassValidation extends AbstractTSClassesValidation<ItemTyp
     @Override
     public String buildPropertyName(final Attribute property)
     {
+        final String attributeTypeName = property.getType().toString().toLowerCase();
+        if(attributeTypeName.startsWith(LOCALIZED_PREFIX))
+        {
+            return property.getQualifier().toString();
+        }
         return FIELD_PREFIX + property.getQualifier().toString();
     }
 }
