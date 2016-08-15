@@ -25,6 +25,8 @@ import com.intellij.idea.plugin.hybris.type.system.common.TSMessages;
 import com.intellij.idea.plugin.hybris.type.system.model.EnumType;
 import com.intellij.idea.plugin.hybris.type.system.model.ItemType;
 import com.intellij.idea.plugin.hybris.type.system.model.Items;
+import com.intellij.idea.plugin.hybris.type.system.model.Relation;
+import com.intellij.idea.plugin.hybris.type.system.validation.TSRelationsValidation;
 import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationGroup;
 import com.intellij.openapi.project.Project;
@@ -39,13 +41,16 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.psi.xml.XmlFile;
+import com.intellij.util.containers.HashMap;
 import com.intellij.util.xml.DomManager;
 import com.sun.istack.NotNull;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Vlad Bozhenok <vladbozhenok@gmail.com>
@@ -64,6 +69,7 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
 
     private static final ItemTypeClassValidation ITEM_TYPE_VALIDATION = new ItemTypeClassValidation();
     private static final EnumTypeClassValidation ENUM_TYPE_VALIDATION = new EnumTypeClassValidation();
+    private static final TSRelationsValidation RELATIONS_VALIDATION = new DefaultTSRelationValidation();
 
     private ItemsPropertiesChangedListener itemsPropertiesListener;
 
@@ -96,8 +102,8 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
                 {
                     final Items itemsRootElement = (Items) domManager.getFileElement((XmlFile) psiFile).getRootElement();
 
-                    final Collection<PsiClass> inheritedItemClasses = findAllInheritClasses(project, ITEM_ROOT_CLASS);
-                    final Collection<PsiClass> inheritedEnumClasses = findAllInheritClasses(project, ENUM_ROOT_CLASS);
+                    final Map<String, PsiClass> inheritedItemClasses = findAllInheritClasses(project, ITEM_ROOT_CLASS);
+                    final Map<String, PsiClass> inheritedEnumClasses = findAllInheritClasses(project, ENUM_ROOT_CLASS);
 
                     final List<EnumType> enumTypeList = itemsRootElement.getEnumTypes().getEnumTypes();
                     final String enumValidationMessage = ENUM_TYPE_VALIDATION.validateGeneratedClasses(enumTypeList, inheritedEnumClasses);
@@ -106,6 +112,10 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
                     final List<ItemType> itemTypeList = itemsRootElement.getItemTypes().getItemTypes();
                     final String itemsValidationMessage = ITEM_TYPE_VALIDATION.validateGeneratedClasses(itemTypeList, inheritedItemClasses);
                     NOTIFICATIONS.showWarningMessage(itemsValidationMessage );
+
+                    final List<Relation> relationsList = itemsRootElement.getRelations().getRelations();
+                    final String relationsValidationMessage = RELATIONS_VALIDATION.validateRelations(inheritedItemClasses, relationsList);
+                    NOTIFICATIONS.showWarningMessage(relationsValidationMessage );
 
                     if(StringUtils.isNotEmpty(enumValidationMessage) || StringUtils.isNotEmpty(enumValidationMessage))
                     {
@@ -117,13 +127,14 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
             }
             catch (Exception e)
             {
+                //TODO: add log
                 e.printStackTrace();
             }
         }
     }
 
 
-    private Collection<PsiClass> findAllInheritClasses(@NotNull final Project project,
+    private Map<String, PsiClass> findAllInheritClasses(@NotNull final Project project,
                                                        @NotNull final String rootClass)
     {
         final PsiClass itemRootClass = JavaPsiFacade.getInstance(project).findClass(
@@ -131,10 +142,17 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
 
         if (null == itemRootClass)
         {
-            return CollectionUtils.EMPTY_COLLECTION;
+            return MapUtils.EMPTY_MAP;
         }
 
-        return ClassInheritorsSearch.search(itemRootClass).findAll();
+        final Collection<PsiClass> foundClasses = ClassInheritorsSearch.search(itemRootClass).findAll();
+        final Map<String, PsiClass> result = new HashMap<>();
+        for(final PsiClass psiClass: foundClasses)
+        {
+            result.put(psiClass.getName(), psiClass);
+        }
+        return result;
+
     }
 
     @Override

@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Vlad Bozhenok <vladbozhenok@gmail.com>
@@ -36,7 +37,7 @@ import java.util.List;
 public abstract class AbstractTSClassesValidation<T, M> {
 
     public String validateGeneratedClasses(@NotNull final List<T> xmlDefinedTypes,
-                                         @NotNull final Collection<PsiClass> generatedClasses)
+                                         @NotNull final Map<String, PsiClass> generatedClasses)
     {
 
         Assert.notNull(xmlDefinedTypes);
@@ -70,7 +71,7 @@ public abstract class AbstractTSClassesValidation<T, M> {
      * @param itemsToFind
      * @return
      */
-    private List<PsiClass> filterXmlTypesClasses( @NotNull final Collection<PsiClass> classesToFilter,
+    private List<PsiClass> filterXmlTypesClasses( @NotNull final Map<String, PsiClass> classesToFilter,
                                                   @NotNull final List<T> itemsToFind)
     {
         Assert.notNull(classesToFilter);
@@ -80,15 +81,9 @@ public abstract class AbstractTSClassesValidation<T, M> {
         final List<PsiClass> filteredItemClasses = new ArrayList<>();
         for (final T item : itemsToFind)
         {
-            for (final PsiClass psiClass : classesToFilter)
-            {
-                modelName = buildGeneratedClassName(item);
-                if (psiClass.getName().endsWith(modelName))
-                {
-                    filteredItemClasses.add(psiClass);
-                    break;
-                }
-            }
+            modelName = buildGeneratedClassName(item);
+            filteredItemClasses.add(classesToFilter.get(modelName));
+
         }
         return filteredItemClasses;
     }

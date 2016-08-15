@@ -16,20 +16,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.intellij.idea.plugin.hybris.type.system.common;
+package com.intellij.idea.plugin.hybris.type.system.validation;
+
+import com.intellij.idea.plugin.hybris.type.system.model.Relation;
+import com.intellij.psi.PsiClass;
+import com.sun.istack.NotNull;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Vlad Bozhenok <vladbozhenok@gmail.com>
  */
-public class TSMessages {
+public interface TSRelationsValidation {
 
-    public static final String RUN_ANT_CLEAN_ALL = "hybris.ts.items.validation.run.ant.clean.all";
-
-    public interface ErrorMessages
-    {
-        String CLASS_NOT_GENERATED = "hybris.ts.items.validation.class.missed.error";
-        String FIELDS_NOT_GENERATED = "hybris.ts.items.validation.field.missed.error";
-        String RELATION_FIELDS_NOT_GENERATED = "hybris.ts.relations.validation.missed.field";
-    }
+    String validateRelations(@NotNull Map<String, PsiClass> generatedClasses,
+                             @NotNull List<Relation> relationsList);
 
 }
