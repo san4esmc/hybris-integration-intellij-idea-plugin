@@ -21,6 +21,7 @@ package com.intellij.idea.plugin.hybris.type.system.validation;
 import com.intellij.idea.plugin.hybris.type.system.model.Relation;
 import com.intellij.psi.PsiClass;
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,8 @@ import java.util.Map;
  */
 public interface TSRelationsValidation {
 
+    @NotNull
     String validateRelations(@NotNull Map<String, PsiClass> generatedClasses,
-                             @NotNull List<Relation> relationsList);
+                             @Nullable List<Relation> relationsList);
 
 }

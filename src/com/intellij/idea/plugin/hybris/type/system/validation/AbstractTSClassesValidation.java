@@ -23,6 +23,7 @@ import com.intellij.idea.plugin.hybris.type.system.common.TSMessages;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.util.Assert;
 
@@ -37,7 +38,7 @@ import java.util.Map;
 public abstract class AbstractTSClassesValidation<T, M> {
 
     public String validateGeneratedClasses(@NotNull final List<T> xmlDefinedTypes,
-                                         @NotNull final Map<String, PsiClass> generatedClasses)
+                                           @NotNull final Map<String, PsiClass> generatedClasses)
     {
 
         Assert.notNull(xmlDefinedTypes);
@@ -49,13 +50,13 @@ public abstract class AbstractTSClassesValidation<T, M> {
 
         for(final T xmlType: xmlDefinedTypes)
         {
-            final PsiClass gneratedClass = getGeneratedClassForItem(xmlType, filteredClasses);
+            final PsiClass generatedClass = getGeneratedClassForItem(xmlType, filteredClasses);
 
-            if(null == gneratedClass)
+            if(null == generatedClass)
             {
                 return HybrisI18NBundleUtils.message(TSMessages.ErrorMessages.CLASS_NOT_GENERATED, buildItemName(xmlType));
             }
-            validationMessage =  validateClass(xmlType, gneratedClass);
+            validationMessage =  validateClass(xmlType, generatedClass);
             if(StringUtils.isNotEmpty(validationMessage))
             {
                 return validationMessage;
@@ -88,8 +89,12 @@ public abstract class AbstractTSClassesValidation<T, M> {
         return filteredItemClasses;
     }
 
-    private  String validateClass(final T xmlType, final PsiClass generatedClass)
+    private  String validateClass( @NotNull final T xmlType,
+                                   @NotNull final PsiClass generatedClass)
     {
+
+        Assert.notNull(xmlType);
+        Assert.notNull(generatedClass);
 
         final List<M> itemFields = getItemFields(xmlType);
 
@@ -113,8 +118,12 @@ public abstract class AbstractTSClassesValidation<T, M> {
     /**
      * Finds field in generated class for attribute defined for type in items.xml
      */
-    private  PsiField getGeneratedFieldForAttribute(final M field, final PsiClass generatedClass)
+    private  PsiField getGeneratedFieldForAttribute(@NotNull final M field,
+                                                    @NotNull final PsiClass generatedClass)
     {
+        Assert.notNull(field);
+        Assert.notNull(generatedClass);
+
         String filedName;
         for(final PsiField generatedField: generatedClass.getAllFields())
         {
@@ -131,8 +140,14 @@ public abstract class AbstractTSClassesValidation<T, M> {
     /**
      * Finds generated class for type defined in items.xml
      */
-    private PsiClass getGeneratedClassForItem(final T xmlType, final List<PsiClass> generatedClasses)
+    @Nullable
+    private PsiClass getGeneratedClassForItem(@NotNull final T xmlType,
+                                              @NotNull final List<PsiClass> generatedClasses)
     {
+
+        Assert.notNull(xmlType);
+        Assert.notNull(generatedClasses);
+
         for(final PsiClass psiClass: generatedClasses)
         {
             if(psiClass.getName().endsWith(buildGeneratedClassName(xmlType)))

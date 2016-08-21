@@ -25,6 +25,7 @@ import com.intellij.idea.plugin.hybris.type.system.validation.TSRelationsValidat
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
 import com.sun.istack.NotNull;
+import com.sun.istack.Nullable;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.util.Assert;
 
@@ -42,7 +43,7 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
 
     @Override
     public String validateRelations(@NotNull final Map<String, PsiClass> generatedClasses,
-                                    @NotNull final List<Relation> relationsList)
+                                    @Nullable final List<Relation> relationsList)
     {
         Assert.notNull(generatedClasses);
 
@@ -62,12 +63,15 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
             }
         }
 
-        return null;
+        return StringUtils.EMPTY;
     }
 
-    private String validateRelation(final Relation relation,
-                                    final Map<String, PsiClass> filteredClasses)
+    private String validateRelation(@NotNull final Relation relation,
+                                    @NotNull final Map<String, PsiClass> filteredClasses)
     {
+        Assert.notNull(relation);
+        Assert.notNull(filteredClasses);
+
         final String fieldNameInTarget = relation.getSourceElement().getQualifier().toString();
         final String targetClassName = relation.getTargetElement().getType().toString();
 
@@ -94,8 +98,8 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
 
     }
 
-    private boolean isNotFieldExistInClass(final Map<String, PsiClass> filteredClasses,
-                                        final String className, final String fieldName)
+    private boolean isNotFieldExistInClass(@NotNull final Map<String, PsiClass> filteredClasses,
+                                        @NotNull final String className, @NotNull final String fieldName)
     {
 
         Assert.notNull(filteredClasses);
@@ -110,7 +114,7 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
         }
         for(final PsiField classField: classItem.getAllFields())
         {
-            if(classField.getName().endsWith(fieldName))//ignore case
+            if(classField.getName().endsWith(fieldName))//todo: ignore case
             {
                 return false;
             }
@@ -119,12 +123,17 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
         return true;
     }
 
-
+    @NotNull
     private Map<String, PsiClass> filterClassesWithRelations(@NotNull final Map<String, PsiClass> generatedClasses,
                                                             @NotNull final List<Relation> relationsList)
     {
 
         final Map<String, PsiClass> filteredClasses = new HashMap<>();
+
+        if(org.apache.commons.collections.CollectionUtils.isEmpty(relationsList))
+        {
+            return filteredClasses;
+        }
 
         for(final Relation relation: relationsList)
         {
@@ -142,6 +151,11 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
                                  @NotNull final Map<String, PsiClass> mapToFill,
                                  @NotNull final String itemName)
     {
+
+        Assert.notNull(generatedClasses);
+        Assert.notNull(mapToFill);
+        Assert.hasText(itemName);
+
         final PsiClass psiClass = generatedClasses.get(itemName + MODEL_SUFFIX);
 
         if(null != psiClass && !mapToFill.containsKey(itemName))

@@ -47,6 +47,7 @@ import com.sun.istack.NotNull;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.util.Assert;
 
 import java.util.Collection;
 import java.util.List;
@@ -117,7 +118,9 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
                     final String relationsValidationMessage = RELATIONS_VALIDATION.validateRelations(inheritedItemClasses, relationsList);
                     NOTIFICATIONS.showWarningMessage(relationsValidationMessage );
 
-                    if(StringUtils.isNotEmpty(enumValidationMessage) || StringUtils.isNotEmpty(enumValidationMessage))
+                    if(StringUtils.isNotEmpty(enumValidationMessage)
+                       || StringUtils.isNotEmpty(enumValidationMessage)
+                       || StringUtils.isNotEmpty(relationsValidationMessage) )
                     {
                         NOTIFICATIONS.showWarningMessage(HybrisI18NBundleUtils.message(TSMessages.RUN_ANT_CLEAN_ALL));
                     }
@@ -134,9 +137,14 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
     }
 
 
+    @NotNull
     private Map<String, PsiClass> findAllInheritClasses(@NotNull final Project project,
                                                        @NotNull final String rootClass)
     {
+
+        Assert.notNull(project);
+        Assert.notNull(rootClass);
+
         final PsiClass itemRootClass = JavaPsiFacade.getInstance(project).findClass(
             rootClass, GlobalSearchScope.allScope(project));
 

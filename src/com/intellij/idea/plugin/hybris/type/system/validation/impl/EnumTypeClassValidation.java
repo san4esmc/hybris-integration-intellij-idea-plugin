@@ -22,6 +22,7 @@ import com.intellij.idea.plugin.hybris.type.system.model.EnumType;
 import com.intellij.idea.plugin.hybris.type.system.model.EnumValue;
 import com.intellij.idea.plugin.hybris.type.system.validation.AbstractTSClassesValidation;
 import com.sun.istack.NotNull;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 
@@ -33,18 +34,30 @@ public class EnumTypeClassValidation extends AbstractTSClassesValidation<EnumTyp
     @Override
     public String buildGeneratedClassName(@NotNull final EnumType enumType)
     {
+        if(null == enumType || null == enumType.getCode())
+        {
+            return StringUtils.EMPTY;
+        }
         return enumType.getCode().toString();
     }
 
     @Override
     public String buildItemName(@NotNull final EnumType enumType)
     {
+        if(null == enumType || null == enumType.getCode())
+        {
+            return StringUtils.EMPTY;
+        }
         return enumType.getCode().toString();
     }
 
     @Override
     public String buildPropertyName(@NotNull final EnumValue enumValue)
     {
+        if(null == enumValue || null == enumValue.getCode())
+        {
+            return StringUtils.EMPTY;
+        }
         return enumValue.getCode().toString();
     }
 

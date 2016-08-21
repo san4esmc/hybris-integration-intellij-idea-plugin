@@ -24,6 +24,7 @@ import com.intellij.idea.plugin.hybris.type.system.model.ItemType;
 import com.intellij.idea.plugin.hybris.type.system.validation.AbstractTSClassesValidation;
 import com.sun.istack.NotNull;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.List;
 
@@ -50,18 +51,30 @@ public class ItemTypeClassValidation extends AbstractTSClassesValidation<ItemTyp
     @Override
     public String buildGeneratedClassName(final ItemType item)
     {
+        if(null == item || null == item.getCode())
+        {
+            return StringUtils.EMPTY;
+        }
         return item.getCode() + MODEL_SUFFIX;
     }
 
     @Override
     public String buildItemName(final ItemType item)
     {
+        if(null == item || null == item.getCode())
+        {
+            return StringUtils.EMPTY;
+        }
         return item.getCode().toString();
     }
 
     @Override
     public String buildPropertyName(final Attribute property)
     {
+        if(null == property)
+        {
+            return StringUtils.EMPTY;
+        }
         final String attributeTypeName = property.getType().toString().toLowerCase();
         if(attributeTypeName.startsWith(LOCALIZED_PREFIX))
         {
