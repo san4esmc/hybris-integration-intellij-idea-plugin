@@ -109,8 +109,6 @@ public abstract class AbstractTSClassesValidation<T, M> {
                                                      buildPropertyName(xmlField),
                                                      buildItemName(xmlType));
             }
-            //todo: maybe add attribute type validation
-
         }
         return StringUtils.EMPTY;
     }

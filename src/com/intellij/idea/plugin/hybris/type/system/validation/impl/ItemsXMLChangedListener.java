@@ -29,6 +29,7 @@ import com.intellij.idea.plugin.hybris.type.system.model.Relation;
 import com.intellij.idea.plugin.hybris.type.system.validation.TSRelationsValidation;
 import com.intellij.notification.NotificationDisplayType;
 import com.intellij.notification.NotificationGroup;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.openapi.vfs.VirtualFileAdapter;
@@ -57,6 +58,8 @@ import java.util.Map;
  * @author Vlad Bozhenok <vladbozhenok@gmail.com>
  */
 public class ItemsXMLChangedListener implements ProjectManagerListener {
+
+    private static final Logger LOG = Logger.getInstance(ItemsXMLChangedListener.class);
 
     private static final String ITEMS_XML_FILE = "-items.xml";
     private static final String ITEM_ROOT_CLASS = "de.hybris.platform.core.model.ItemModel";
@@ -119,7 +122,7 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
                     NOTIFICATIONS.showWarningMessage(relationsValidationMessage );
 
                     if(StringUtils.isNotEmpty(enumValidationMessage)
-                       || StringUtils.isNotEmpty(enumValidationMessage)
+                       || StringUtils.isNotEmpty(itemsValidationMessage)
                        || StringUtils.isNotEmpty(relationsValidationMessage) )
                     {
                         NOTIFICATIONS.showWarningMessage(HybrisI18NBundleUtils.message(TSMessages.RUN_ANT_CLEAN_ALL));
@@ -130,8 +133,7 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
             }
             catch (Exception e)
             {
-                //TODO: add log
-                e.printStackTrace();
+                LOG.error(String.format("Items validation error. File: %s", event.getFileName()), e);
             }
         }
     }
