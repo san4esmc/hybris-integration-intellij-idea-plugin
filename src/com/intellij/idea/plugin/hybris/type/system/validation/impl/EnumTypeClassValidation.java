@@ -21,8 +21,8 @@ package com.intellij.idea.plugin.hybris.type.system.validation.impl;
 import com.intellij.idea.plugin.hybris.type.system.model.EnumType;
 import com.intellij.idea.plugin.hybris.type.system.model.EnumValue;
 import com.intellij.idea.plugin.hybris.type.system.validation.AbstractTSClassesValidation;
-import com.sun.istack.NotNull;
-import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 

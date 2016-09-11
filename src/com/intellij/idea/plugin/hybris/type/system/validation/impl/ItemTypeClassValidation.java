@@ -22,9 +22,9 @@ import com.intellij.idea.plugin.hybris.type.system.model.Attribute;
 import com.intellij.idea.plugin.hybris.type.system.model.Attributes;
 import com.intellij.idea.plugin.hybris.type.system.model.ItemType;
 import com.intellij.idea.plugin.hybris.type.system.validation.AbstractTSClassesValidation;
-import com.sun.istack.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 

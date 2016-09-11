@@ -18,7 +18,7 @@
 
 package com.intellij.idea.plugin.hybris.common.services;
 
-import com.sun.istack.NotNull;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Vlad Bozhenok <vladbozhenok@gmail.com>

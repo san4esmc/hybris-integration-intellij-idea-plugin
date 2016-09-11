@@ -20,8 +20,8 @@ package com.intellij.idea.plugin.hybris.type.system.validation;
 
 import com.intellij.idea.plugin.hybris.type.system.model.Relation;
 import com.intellij.psi.PsiClass;
-import com.sun.istack.NotNull;
-import com.sun.istack.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Map;

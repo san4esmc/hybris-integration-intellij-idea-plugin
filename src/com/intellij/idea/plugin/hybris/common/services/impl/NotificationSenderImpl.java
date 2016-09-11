@@ -26,9 +26,9 @@ import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
-import com.sun.istack.NotNull;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.util.Assert;
+import org.jetbrains.annotations.NotNull;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 /**
  * @author Vlad Bozhenok <vladbozhenok@gmail.com>
@@ -63,7 +63,7 @@ public class NotificationSenderImpl implements NotificationSender {
     private void showMessage(@NotNull final String message,
                              @NotNull final NotificationType messageLevel){
 
-        Assert.notNull(messageLevel);
+        Validate.notNull(messageLevel);
 
         if(StringUtils.isEmpty(message))
         {

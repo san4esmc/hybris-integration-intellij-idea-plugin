@@ -44,11 +44,10 @@ import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.util.containers.HashMap;
 import com.intellij.util.xml.DomManager;
-import com.sun.istack.NotNull;
-import org.apache.commons.collections.CollectionUtils;
+import org.jetbrains.annotations.NotNull;
 import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.util.Assert;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 import java.util.Collection;
 import java.util.List;
@@ -144,8 +143,8 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
                                                        @NotNull final String rootClass)
     {
 
-        Assert.notNull(project);
-        Assert.notNull(rootClass);
+        Validate.notNull(project);
+        Validate.notNull(rootClass);
 
         final PsiClass itemRootClass = JavaPsiFacade.getInstance(project).findClass(
             rootClass, GlobalSearchScope.allScope(project));

@@ -24,11 +24,10 @@ import com.intellij.idea.plugin.hybris.type.system.model.Relation;
 import com.intellij.idea.plugin.hybris.type.system.validation.TSRelationsValidation;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
-import com.sun.istack.NotNull;
+import org.jetbrains.annotations.NotNull;
 import com.sun.istack.Nullable;
-import org.apache.commons.lang.StringUtils;
-import org.springframework.util.Assert;
-
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +44,7 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
     public String validateRelations(@NotNull final Map<String, PsiClass> generatedClasses,
                                     @Nullable final List<Relation> relationsList)
     {
-        Assert.notNull(generatedClasses);
+        Validate.notNull(generatedClasses);
 
         if(null == relationsList)
         {
@@ -69,8 +68,8 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
     private String validateRelation(@NotNull final Relation relation,
                                     @NotNull final Map<String, PsiClass> filteredClasses)
     {
-        Assert.notNull(relation);
-        Assert.notNull(filteredClasses);
+        Validate.notNull(relation);
+        Validate.notNull(filteredClasses);
 
         final String fieldNameInTarget = relation.getSourceElement().getQualifier().toString();
         final String targetClassName = relation.getTargetElement().getType().toString();
@@ -102,9 +101,9 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
                                         @NotNull final String className, @NotNull final String fieldName)
     {
 
-        Assert.notNull(filteredClasses);
-        Assert.hasText(className);
-        Assert.hasText(fieldName);
+        Validate.notNull(filteredClasses);
+        Validate.notNull(className);
+        Validate.notNull(fieldName);
 
         final PsiClass classItem = filteredClasses.get(className);
 
@@ -152,9 +151,9 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
                                  @NotNull final String itemName)
     {
 
-        Assert.notNull(generatedClasses);
-        Assert.notNull(mapToFill);
-        Assert.hasText(itemName);
+        Validate.notNull(generatedClasses);
+        Validate.notNull(mapToFill);
+        Validate.notNull(itemName);
 
         final PsiClass psiClass = generatedClasses.get(itemName + MODEL_SUFFIX);
 
