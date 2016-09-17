@@ -26,6 +26,9 @@ import com.intellij.idea.plugin.hybris.project.settings.jaxb.localextensions.Ext
 import com.intellij.idea.plugin.hybris.project.settings.jaxb.localextensions.Hybrisconfig;
 import com.intellij.idea.plugin.hybris.project.tasks.TaskProgressProcessor;
 import com.intellij.idea.plugin.hybris.project.utils.FindHybrisModuleDescriptorByName;
+import com.intellij.idea.plugin.hybris.settings.HybrisApplicationSettings;
+import com.intellij.idea.plugin.hybris.settings.HybrisApplicationSettingsComponent;
+import com.intellij.idea.plugin.hybris.settings.HybrisProjectSettingsComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
@@ -37,8 +40,8 @@ import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import gnu.trove.THashSet;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +60,7 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static com.intellij.idea.plugin.hybris.common.utils.CollectionUtils.emptyIfNull;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 /**
@@ -69,7 +73,7 @@ public class DefaultHybrisProjectDescriptor implements HybrisProjectDescriptor {
     private static final Logger LOG = Logger.getInstance(DefaultHybrisProjectDescriptor.class);
 
     @Nullable
-    protected final Project project;
+    protected Project project;
     @NotNull
     protected final List<HybrisModuleDescriptor> foundModules = new ArrayList<HybrisModuleDescriptor>();
     @NotNull
@@ -85,7 +89,7 @@ public class DefaultHybrisProjectDescriptor implements HybrisProjectDescriptor {
     @Nullable
     protected File sourceCodeZip;
     protected boolean openProjectSettingsAfterImport;
-    protected boolean importOotbModulesInReadOnlyMode = true;
+    protected Boolean importOotbModulesInReadOnlyMode;
     @NotNull
     protected final List<String> explicitlyDefinedModules = new ArrayList<String>();
     @Nullable
@@ -96,7 +100,25 @@ public class DefaultHybrisProjectDescriptor implements HybrisProjectDescriptor {
     @Nullable
     protected String javadocUrl;
 
-    public DefaultHybrisProjectDescriptor(@Nullable final Project project) {
+    @Override
+    public void setProject(@Nullable final Project project) {
+        if (project == null) {
+            return;
+        }
+        // the project may not be hybris based project.
+        final HybrisProjectSettingsComponent hybrisProjectSettings = HybrisProjectSettingsComponent.getInstance(project);
+        if (hybrisProjectSettings == null) {
+            return;
+        }
+        if (hybrisProjectSettings.getState() != null) {
+            if (hybrisProjectSettings.getState().isHybisProject()) {
+                setHybrisProject(project);
+            }
+        }
+    }
+
+    @Override
+    public void setHybrisProject(@Nullable final Project project) {
         this.project = project;
     }
 
@@ -129,7 +151,7 @@ public class DefaultHybrisProjectDescriptor implements HybrisProjectDescriptor {
     @NotNull
     @Override
     public Set<HybrisModuleDescriptor> getAlreadyOpenedModules() {
-        if (null == this.project) {
+        if (null == getProject()) {
             return Collections.emptySet();
         }
 
@@ -137,7 +159,7 @@ public class DefaultHybrisProjectDescriptor implements HybrisProjectDescriptor {
 
         try {
             if (this.alreadyOpenedModules.isEmpty()) {
-                this.alreadyOpenedModules.addAll(this.getAlreadyOpenedModules(this.project));
+                this.alreadyOpenedModules.addAll(this.getAlreadyOpenedModules(getProject()));
             }
         } finally {
             this.lock.unlock();
@@ -317,7 +339,7 @@ public class DefaultHybrisProjectDescriptor implements HybrisProjectDescriptor {
     }
 
     @Override
-    public boolean isImportOotbModulesInReadOnlyMode() {
+    public Boolean isImportOotbModulesInReadOnlyMode() {
         return importOotbModulesInReadOnlyMode;
     }
 
@@ -414,6 +436,8 @@ public class DefaultHybrisProjectDescriptor implements HybrisProjectDescriptor {
         final List<HybrisModuleDescriptor> moduleDescriptors = new ArrayList<HybrisModuleDescriptor>();
         final List<File> pathsFailedToImport = new ArrayList<File>();
 
+        addRootModule(rootDirectory, moduleDescriptors, pathsFailedToImport);
+
         final HybrisModuleDescriptorFactory hybrisModuleDescriptorFactory = ServiceManager.getService(
             HybrisModuleDescriptorFactory.class
         );
@@ -441,6 +465,23 @@ public class DefaultHybrisProjectDescriptor implements HybrisProjectDescriptor {
         this.foundModules.addAll(moduleDescriptors);
     }
 
+    private void addRootModule(
+        final File rootDirectory, final List<HybrisModuleDescriptor> moduleDescriptors,
+        final List<File> pathsFailedToImport
+    ) {
+        final HybrisApplicationSettings hybrisApplicationSettings = HybrisApplicationSettingsComponent.getInstance().getState();
+        final boolean groupModules = hybrisApplicationSettings.isGroupModules();
+        if (groupModules) {
+            return;
+        }
+        try {
+            moduleDescriptors.add(new RootModuleDescriptor(rootDirectory, this));
+        } catch (HybrisConfigurationException e) {
+            LOG.error("Can not import a module using path: " + pathsFailedToImport, e);
+            pathsFailedToImport.add(rootDirectory);
+        }
+    }
+
     @NotNull
     protected List<File> findModuleRoots(@NotNull final File rootProjectDirectory,
                                          @Nullable final TaskProgressProcessor<File> progressListenerProcessor
@@ -458,6 +499,9 @@ public class DefaultHybrisProjectDescriptor implements HybrisProjectDescriptor {
         final HybrisProjectService hybrisProjectService = ServiceManager.getService(HybrisProjectService.class);
 
         if (hybrisProjectService.isRegularModule(rootProjectDirectory)
+            || hybrisProjectService.isPlatformExtModule(rootProjectDirectory)
+            || hybrisProjectService.isOutOfTheBoxModule(rootProjectDirectory)
+            || hybrisProjectService.isCoreExtModule(rootProjectDirectory)
             || hybrisProjectService.isConfigModule(rootProjectDirectory)) {
 
             paths.add(rootProjectDirectory);
@@ -500,8 +544,8 @@ public class DefaultHybrisProjectDescriptor implements HybrisProjectDescriptor {
 
             for (String requiresExtensionName : requiredExtensionNames) {
 
-                final Iterable<HybrisModuleDescriptor> dependsOn = Iterables.filter(
-                    moduleDescriptors, new FindHybrisModuleDescriptorByName(requiresExtensionName)
+                final Iterable<HybrisModuleDescriptor> dependsOn = this.findHybrisModuleDescriptorsByName(
+                    moduleDescriptors, requiresExtensionName
                 );
 
                 if (Iterables.isEmpty(dependsOn)) {
@@ -516,7 +560,42 @@ public class DefaultHybrisProjectDescriptor implements HybrisProjectDescriptor {
                 }
             }
 
+            if (moduleDescriptor.isAddOn()) {
+                this.processAddOnBackwardDependencies(moduleDescriptors, moduleDescriptor, dependencies);
+            }
+
             moduleDescriptor.setDependenciesTree(dependencies);
         }
+    }
+
+    protected void processAddOnBackwardDependencies(
+        @NotNull final Iterable<HybrisModuleDescriptor> moduleDescriptors,
+        @NotNull final HybrisModuleDescriptor addOn,
+        @NotNull final Set<HybrisModuleDescriptor> addOnDependencies
+    ) {
+        Validate.notNull(moduleDescriptors);
+        Validate.notNull(addOn);
+        Validate.notNull(addOnDependencies);
+
+        if (HybrisApplicationSettingsComponent.getInstance().getState().isCreateBackwardCyclicDependenciesForAddOns()) {
+            for (HybrisModuleDescriptor moduleDescriptor : moduleDescriptors) {
+                if (moduleDescriptor.getRequiredExtensionNames().contains(addOn.getName())) {
+                    addOnDependencies.add(moduleDescriptor);
+                }
+            }
+        }
+    }
+
+    @NotNull
+    protected Iterable<HybrisModuleDescriptor> findHybrisModuleDescriptorsByName(
+        @NotNull final Iterable<HybrisModuleDescriptor> moduleDescriptors,
+        @NotNull final String requiresExtensionName
+    ) {
+        Validate.notNull(moduleDescriptors);
+        Validate.notEmpty(requiresExtensionName);
+
+        return emptyIfNull(Iterables.filter(
+            moduleDescriptors, new FindHybrisModuleDescriptorByName(requiresExtensionName)
+        ));
     }
 }

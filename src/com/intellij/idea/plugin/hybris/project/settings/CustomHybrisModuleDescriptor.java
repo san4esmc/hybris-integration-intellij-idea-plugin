@@ -14,18 +14,30 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */package com.intellij.idea.plugin.hybris.type.system;
+ */
 
-import com.intellij.lang.Language;
+package com.intellij.idea.plugin.hybris.project.settings;
+
+import com.intellij.idea.plugin.hybris.project.exceptions.HybrisConfigurationException;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
- * Created by Martin Zdarsky-Jones (martin.zdarsky@hybris.com) on 3/06/2016.
+ * Created by Martin Zdarsky-Jones on 19/08/2016.
  */
-public class TypeSystemLanguage extends Language {
-    public static final String TYPE_SYSTEM_LANGUAGE_ID = "[y] Type System";
-    public static final TypeSystemLanguage INSTANCE = new TypeSystemLanguage();
+public class CustomHybrisModuleDescriptor extends RegularHybrisModuleDescriptor {
 
-    private TypeSystemLanguage() {
-        super(TYPE_SYSTEM_LANGUAGE_ID);
+    public CustomHybrisModuleDescriptor(
+        @NotNull final File moduleRootDirectory,
+        @NotNull final HybrisProjectDescriptor rootProjectDescriptor
+    ) throws HybrisConfigurationException {
+        super(moduleRootDirectory, rootProjectDescriptor);
+    }
+
+    protected Collection<? extends String> getAdditionalRequiredExtensionNames() {
+        return Collections.emptySet();
     }
 }

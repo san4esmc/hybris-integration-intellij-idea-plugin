@@ -51,7 +51,19 @@ public class DefaultHybrisModuleDescriptorFactory implements HybrisModuleDescrip
             return new PlatformHybrisModuleDescriptor(file, rootProjectDescriptor);
         }
 
-        return new DefaultHybrisModuleDescriptor(file, rootProjectDescriptor);
+        if (hybrisProjectService.isCoreExtModule(file)) {
+            return new CoreHybrisHybrisModuleDescriptor(file, rootProjectDescriptor);
+        }
+
+        if (hybrisProjectService.isPlatformExtModule(file)) {
+            return new ExtHybrisModuleDescriptor(file, rootProjectDescriptor);
+        }
+
+        if (hybrisProjectService.isOutOfTheBoxModule(file)) {
+            return new OotbHybrisModuleDescriptor(file, rootProjectDescriptor);
+        }
+
+        return new CustomHybrisModuleDescriptor(file, rootProjectDescriptor);
     }
 
 }

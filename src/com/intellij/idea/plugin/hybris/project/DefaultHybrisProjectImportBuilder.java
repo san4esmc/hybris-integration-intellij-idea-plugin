@@ -18,8 +18,15 @@
 
 package com.intellij.idea.plugin.hybris.project;
 
+import com.intellij.facet.FacetType;
+import com.intellij.facet.FacetTypeId;
+import com.intellij.facet.FacetTypeRegistry;
 import com.intellij.facet.ModifiableFacetModel;
+import com.intellij.framework.FrameworkType;
+import com.intellij.framework.detection.DetectionExcludesConfiguration;
+import com.intellij.framework.detection.impl.FrameworkDetectionUtil;
 import com.intellij.idea.plugin.hybris.common.services.VirtualFileSystemService;
+import com.intellij.idea.plugin.hybris.impex.ImpexLanguage;
 import com.intellij.idea.plugin.hybris.project.configurators.JavadocModuleConfigurator;
 import com.intellij.idea.plugin.hybris.project.configurators.impl.DefaultConfiguratorFactory;
 import com.intellij.idea.plugin.hybris.project.configurators.CompilerOutputPathsConfigurator;
@@ -39,6 +46,9 @@ import com.intellij.idea.plugin.hybris.settings.HybrisProjectSettingsComponent;
 import com.intellij.idea.plugin.hybris.common.HybrisConstants;
 import com.intellij.idea.plugin.hybris.common.utils.HybrisI18NBundleUtils;
 import com.intellij.idea.plugin.hybris.common.utils.HybrisIcons;
+import com.intellij.javaee.application.facet.JavaeeApplicationFacet;
+import com.intellij.javaee.web.facet.WebFacet;
+import com.intellij.lang.Language;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
@@ -66,6 +76,11 @@ import com.intellij.openapi.roots.ui.configuration.projectRoot.StructureConfigur
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.packaging.artifacts.ModifiableArtifactModel;
+import com.intellij.psi.codeStyle.CodeStyleScheme;
+import com.intellij.psi.codeStyle.CodeStyleSchemes;
+import com.intellij.psi.codeStyle.CodeStyleSettings;
+import com.intellij.psi.codeStyle.CommonCodeStyleSettings;
+import com.intellij.spring.facet.SpringFacet;
 import com.intellij.util.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -76,6 +91,8 @@ import javax.annotation.concurrent.GuardedBy;
 import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -118,6 +135,13 @@ public class DefaultHybrisProjectImportBuilder extends AbstractHybrisProjectImpo
         return ServiceManager.getService(DefaultConfiguratorFactory.class);
     }
 
+    @Nullable
+    public Project createProject(String name, String path) {
+        final Project project = super.createProject(name, path);
+        getHybrisProjectDescriptor().setHybrisProject(project);
+        return project;
+    }
+
     @Override
     public void setRootProjectDirectory(@NotNull final File directory) {
         Validate.notNull(directory);
@@ -151,7 +175,8 @@ public class DefaultHybrisProjectImportBuilder extends AbstractHybrisProjectImpo
 
         try {
             if (null == this.hybrisProjectDescriptor) {
-                this.hybrisProjectDescriptor = new DefaultHybrisProjectDescriptor(getCurrentProject());
+                this.hybrisProjectDescriptor = new DefaultHybrisProjectDescriptor();
+                this.hybrisProjectDescriptor.setProject(getCurrentProject());
             }
 
             //noinspection ConstantConditions
@@ -200,6 +225,12 @@ public class DefaultHybrisProjectImportBuilder extends AbstractHybrisProjectImpo
         this.selectSdk(project);
 
         this.saveCustomDirectoryLocation(project);
+
+        this.disableWrapOnType(ImpexLanguage.getInstance());
+
+        this.excludeFrameworkDetection(project, SpringFacet.FACET_TYPE_ID);
+        this.excludeFrameworkDetection(project, WebFacet.ID);
+        this.excludeFrameworkDetection(project, JavaeeApplicationFacet.ID);
 
         this.performProjectsCleanup(this.getHybrisProjectDescriptor().getModulesChosenForImport());
 
@@ -270,10 +301,36 @@ public class DefaultHybrisProjectImportBuilder extends AbstractHybrisProjectImpo
         return result;
     }
 
+    private void disableWrapOnType(final Language impexLanguage) {
+        final CodeStyleScheme currentScheme = CodeStyleSchemes.getInstance().getCurrentScheme();
+        final CodeStyleSettings codeStyleSettings = currentScheme.getCodeStyleSettings();
+        if (impexLanguage != null) {
+            CommonCodeStyleSettings langSettings = codeStyleSettings.getCommonSettings(impexLanguage);
+            if (langSettings != null) {
+                langSettings.WRAP_ON_TYPING = CommonCodeStyleSettings.WrapOnTyping.NO_WRAP.intValue;
+            }
+        }
+    }
+
+    private void excludeFrameworkDetection(final Project project, FacetTypeId facetTypeId) {
+        final DetectionExcludesConfiguration configuration = DetectionExcludesConfiguration.getInstance(project);
+        final FacetType facetType = FacetTypeRegistry.getInstance().findFacetType(facetTypeId);
+        if (facetType != null) {
+            final FrameworkType frameworkType = FrameworkDetectionUtil.findFrameworkTypeForFacetDetector(facetType);
+            if (frameworkType != null) {
+                configuration.addExcludedFramework(frameworkType);
+            }
+        }
+    }
+
     private void saveCustomDirectoryLocation(final Project project) {
         final HybrisProjectSettings hybrisProjectSettings = HybrisProjectSettingsComponent.getInstance(project).getState();
         final File customDirectory = this.getHybrisProjectDescriptor().getCustomExtensionsDirectory();
-        hybrisProjectSettings.setCustomDirectory(customDirectory);
+        final File hybrisDirectory = this.getHybrisProjectDescriptor().getHybrisDistributionDirectory();
+        final Path customPath = Paths.get(customDirectory.getAbsolutePath());
+        final Path hybrisPath = Paths.get(hybrisDirectory.getAbsolutePath());
+        final Path relativePath = hybrisPath.relativize(customPath);
+        hybrisProjectSettings.setCustomDirectory(relativePath.toString());
     }
 
     private void selectSdk(@NotNull final Project project) {

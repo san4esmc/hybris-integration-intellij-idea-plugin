@@ -16,24 +16,47 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.intellij.idea.plugin.hybris.project.settings;
+package com.intellij.idea.plugin.hybris.type.system.inspections;
 
-import com.intellij.idea.plugin.hybris.project.exceptions.HybrisConfigurationException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.util.Collection;
+public interface XmlRule {
 
-/**
- * Created 1:58 PM 20 June 2015.
- *
- * @author Alexander Bartash <AlexanderBartash@gmail.com>
- */
-public interface HybrisModuleDescriptorFactory {
+    enum Priority {
+        HIGH, MEDIUM, LOW;
+
+        @Nullable
+        public static Priority fromAcronym(final String acronym) {
+            switch (acronym) {
+                case "H":
+                    return HIGH;
+                case "M":
+                    return MEDIUM;
+                case "L":
+                    return LOW;
+                default:
+                    return null;
+            }
+        }
+
+    }
 
     @NotNull
-    HybrisModuleDescriptor createDescriptor(@NotNull File file,
-                                            @NotNull HybrisProjectDescriptor rootProjectDescriptor
-    ) throws HybrisConfigurationException;
+    String getID();
 
+    @NotNull
+    String getDescription();
+
+    @NotNull
+    Priority getPriority();
+
+    @Nullable
+    String getSelectionXPath();
+
+    @Nullable
+    String getNameXPath();
+
+    @Nullable
+    String getTestXPath();
 }

@@ -34,6 +34,10 @@ import java.util.Set;
  */
 public interface HybrisProjectDescriptor {
 
+    void setProject(@Nullable Project project);
+
+    void setHybrisProject(@Nullable Project project);
+
     @Nullable
     Project getProject();
 
@@ -71,7 +75,7 @@ public interface HybrisProjectDescriptor {
 
     void setOpenProjectSettingsAfterImport(boolean openProjectSettingsAfterImport);
 
-    boolean isImportOotbModulesInReadOnlyMode();
+    Boolean isImportOotbModulesInReadOnlyMode();
 
     void setImportOotbModulesInReadOnlyMode(boolean importOotbModulesInReadOnlyMode);
 
