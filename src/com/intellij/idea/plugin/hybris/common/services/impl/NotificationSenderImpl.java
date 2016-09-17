@@ -18,17 +18,18 @@
 
 package com.intellij.idea.plugin.hybris.common.services.impl;
 
+import com.intellij.idea.plugin.hybris.common.services.CommonIdeaService;
 import com.intellij.idea.plugin.hybris.common.services.NotificationSender;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationGroup;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
-import org.jetbrains.annotations.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Vlad Bozhenok <vladbozhenok@gmail.com>
@@ -37,45 +38,43 @@ public class NotificationSenderImpl implements NotificationSender {
 
     private NotificationGroup group;
 
-    public NotificationSenderImpl(@NotNull final NotificationGroup group)
-    {
+    public NotificationSenderImpl(@NotNull final NotificationGroup group) {
         this.group = group;
     }
 
     @Override
-    public void showInfoMessage(@NotNull final String message)
-    {
+    public void showInfoMessage(@NotNull final String message) {
         showMessage(message, NotificationType.INFORMATION);
     }
 
     @Override
-    public void showWarningMessage(@NotNull final String message)
-    {
+    public void showWarningMessage(@NotNull final String message) {
         showMessage(message, NotificationType.WARNING);
     }
 
     @Override
-    public void showErrorMessage(@NotNull final String message)
-    {
+    public void showErrorMessage(@NotNull final String message) {
         showMessage(message, NotificationType.ERROR);
     }
 
-    private void showMessage(@NotNull final String message,
-                             @NotNull final NotificationType messageLevel){
+    private void showMessage(
+        @NotNull final String message,
+        @NotNull final NotificationType messageLevel
+    ) {
 
         Validate.notNull(messageLevel);
 
-        if(StringUtils.isEmpty(message))
-        {
+        if (StringUtils.isEmpty(message)) {
             return;
         }
 
         ApplicationManager.getApplication().invokeLater(() -> {
-            final Notification notification = group.createNotification(message, messageLevel);
-            final Project[] projects = ProjectManager.getInstance().getOpenProjects();
-            Notifications.Bus.notify(notification, projects[0]);
+            final Notification notification = this.group.createNotification(message, messageLevel);
+
+            final CommonIdeaService commonIdeaService = ServiceManager.getService(CommonIdeaService.class);
+            final Project project = commonIdeaService.getProject();
+
+            Notifications.Bus.notify(notification, project);
         });
-
     }
-
 }
