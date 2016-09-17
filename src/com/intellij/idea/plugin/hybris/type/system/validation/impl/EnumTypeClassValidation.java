@@ -36,6 +36,7 @@ public class EnumTypeClassValidation extends AbstractTSClassesValidation<EnumTyp
         if (null == item) {
             return StringUtils.EMPTY;
         }
+
         return item.getCode().toString();
     }
 
@@ -44,6 +45,7 @@ public class EnumTypeClassValidation extends AbstractTSClassesValidation<EnumTyp
         if (null == item) {
             return StringUtils.EMPTY;
         }
+
         return item.getCode().toString();
     }
 
@@ -52,6 +54,7 @@ public class EnumTypeClassValidation extends AbstractTSClassesValidation<EnumTyp
         if (null == property) {
             return StringUtils.EMPTY;
         }
+
         return property.getCode().toString();
     }
 

@@ -40,29 +40,30 @@ public abstract class AbstractTSClassesValidation<T, M> {
         @NotNull final List<T> xmlDefinedTypes,
         @NotNull final Map<String, PsiClass> generatedClasses
     ) {
-
         Validate.notNull(xmlDefinedTypes);
         Validate.notNull(generatedClasses);
 
-        final List<PsiClass> filteredClasses = filterXmlTypesClasses(generatedClasses, xmlDefinedTypes);
+        final List<PsiClass> filteredClasses = this.filterXmlTypesClasses(generatedClasses, xmlDefinedTypes);
 
         String validationMessage;
 
         for (final T xmlType : xmlDefinedTypes) {
-            final PsiClass generatedClass = getGeneratedClassForItem(xmlType, filteredClasses);
+            final PsiClass generatedClass = this.getGeneratedClassForItem(xmlType, filteredClasses);
 
             if (null == generatedClass) {
                 return HybrisI18NBundleUtils.message(
                     TSMessages.ErrorMessages.CLASS_NOT_GENERATED,
-                    buildItemName(xmlType)
+                    this.buildItemName(xmlType)
                 );
             }
-            validationMessage = validateClass(xmlType, generatedClass);
+
+            validationMessage = this.validateClass(xmlType, generatedClass);
             if (StringUtils.isNotEmpty(validationMessage)) {
                 return validationMessage;
             }
 
         }
+
         return StringUtils.EMPTY;
     }
 
@@ -79,10 +80,11 @@ public abstract class AbstractTSClassesValidation<T, M> {
         String modelName;
         final List<PsiClass> filteredItemClasses = new ArrayList<>();
         for (final T item : itemsToFind) {
-            modelName = buildGeneratedClassName(item);
+            modelName = this.buildGeneratedClassName(item);
             filteredItemClasses.add(classesToFilter.get(modelName));
 
         }
+
         return filteredItemClasses;
     }
 
@@ -90,24 +92,24 @@ public abstract class AbstractTSClassesValidation<T, M> {
         @NotNull final T xmlType,
         @NotNull final PsiClass generatedClass
     ) {
-
         Validate.notNull(xmlType);
         Validate.notNull(generatedClass);
 
-        final List<M> itemFields = getItemFields(xmlType);
+        final List<M> itemFields = this.getItemFields(xmlType);
 
         PsiField fieldToValidate;
         for (final M xmlField : itemFields) {
-            fieldToValidate = getGeneratedFieldForAttribute(xmlField, generatedClass);
+            fieldToValidate = this.getGeneratedFieldForAttribute(xmlField, generatedClass);
 
             if (null == fieldToValidate) {
                 return HybrisI18NBundleUtils.message(
                     TSMessages.ErrorMessages.FIELDS_NOT_GENERATED,
-                    buildPropertyName(xmlField),
-                    buildItemName(xmlType)
+                    this.buildPropertyName(xmlField),
+                    this.buildItemName(xmlType)
                 );
             }
         }
+
         return StringUtils.EMPTY;
     }
 
@@ -123,12 +125,13 @@ public abstract class AbstractTSClassesValidation<T, M> {
 
         String filedName;
         for (final PsiField generatedField : generatedClass.getAllFields()) {
-            filedName = buildPropertyName(field);
+            filedName = this.buildPropertyName(field);
 
             if (generatedField.getName().toLowerCase().endsWith(filedName.toLowerCase())) {
                 return generatedField;
             }
         }
+
         return null;
     }
 
@@ -140,15 +143,15 @@ public abstract class AbstractTSClassesValidation<T, M> {
         @NotNull final T xmlType,
         @NotNull final List<PsiClass> generatedClasses
     ) {
-
         Validate.notNull(xmlType);
         Validate.notNull(generatedClasses);
 
         for (final PsiClass psiClass : generatedClasses) {
-            if (psiClass.getName().endsWith(buildGeneratedClassName(xmlType))) {
+            if (psiClass.getName().endsWith(this.buildGeneratedClassName(xmlType))) {
                 return psiClass;
             }
         }
+
         return null;
     }
 
@@ -159,6 +162,4 @@ public abstract class AbstractTSClassesValidation<T, M> {
     public abstract String buildPropertyName(M property);
 
     public abstract List<M> getItemFields(@NotNull final T item);
-
-
 }

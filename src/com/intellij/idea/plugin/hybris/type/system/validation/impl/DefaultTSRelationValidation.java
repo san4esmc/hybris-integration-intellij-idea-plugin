@@ -52,7 +52,7 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
             return StringUtils.EMPTY;
         }
 
-        final Map<String, PsiClass> filteredClasses = filterClassesWithRelations(generatedClasses, relationsList);
+        final Map<String, PsiClass> filteredClasses = this.filterClassesWithRelations(generatedClasses, relationsList);
 
         for (final Relation relation : relationsList) {
             final String validationResult = this.validateRelation(relation, filteredClasses);
@@ -74,7 +74,7 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
         final String fieldNameInTarget = relation.getSourceElement().getQualifier().toString();
         final String targetClassName = relation.getTargetElement().getType().toString();
 
-        if (isNotFieldExistInClass(filteredClasses, targetClassName, fieldNameInTarget)) {
+        if (this.isNotFieldExistInClass(filteredClasses, targetClassName, fieldNameInTarget)) {
             return HybrisI18NBundleUtils.message(
                 TSMessages.ErrorMessages.RELATION_FIELDS_NOT_GENERATED,
                 fieldNameInTarget,
@@ -85,7 +85,7 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
         final String fieldNameInSource = relation.getTargetElement().getQualifier().toString();
         final String sourceClassName = relation.getSourceElement().getType().toString();
 
-        if (isNotFieldExistInClass(filteredClasses, sourceClassName, fieldNameInSource)) {
+        if (this.isNotFieldExistInClass(filteredClasses, sourceClassName, fieldNameInSource)) {
             return HybrisI18NBundleUtils.message(
                 TSMessages.ErrorMessages.RELATION_FIELDS_NOT_GENERATED,
                 fieldNameInSource,
@@ -94,7 +94,6 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
         }
 
         return StringUtils.EMPTY;
-
     }
 
     private boolean isNotFieldExistInClass(
@@ -111,6 +110,7 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
         if (null == classItem) {
             return true;
         }
+
         for (final PsiField classField : classItem.getAllFields()) {
             if (classField.getName().endsWith(fieldName))//todo: ignore case
             {
@@ -135,13 +135,12 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
 
         for (final Relation relation : relationsList) {
 
-            addToSetIfExist(generatedClasses, filteredClasses, relation.getSourceElement().getType().toString());
-            addToSetIfExist(generatedClasses, filteredClasses, relation.getTargetElement().getType().toString());
+            this.addToSetIfExist(generatedClasses, filteredClasses, relation.getSourceElement().getType().toString());
+            this.addToSetIfExist(generatedClasses, filteredClasses, relation.getTargetElement().getType().toString());
 
         }
 
         return filteredClasses;
-
     }
 
     private void addToSetIfExist(
@@ -160,6 +159,4 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
             mapToFill.put(itemName, psiClass);
         }
     }
-
-
 }

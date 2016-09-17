@@ -94,17 +94,19 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
             }
             try {
 
-                final DomManager domManager = DomManager.getDomManager(project);
+                final DomManager domManager = DomManager.getDomManager(this.project);
 
-                final PsiManager psiManager = PsiManager.getInstance(project);
+                final PsiManager psiManager = PsiManager.getInstance(this.project);
                 final PsiFile psiFile = psiManager.findFile(event.getFile());
 
                 if (psiFile != null && (psiFile instanceof XmlFile)) {
                     final Items itemsRootElement = (Items) domManager.getFileElement((XmlFile) psiFile)
                                                                      .getRootElement();
 
-                    final Map<String, PsiClass> inheritedItemClasses = findAllInheritClasses(project, ITEM_ROOT_CLASS);
-                    final Map<String, PsiClass> inheritedEnumClasses = findAllInheritClasses(project, ENUM_ROOT_CLASS);
+                    final Map<String, PsiClass> inheritedItemClasses = ItemsXMLChangedListener.this.findAllInheritClasses(
+                        this.project, ITEM_ROOT_CLASS);
+                    final Map<String, PsiClass> inheritedEnumClasses = ItemsXMLChangedListener.this.findAllInheritClasses(
+                        this.project, ENUM_ROOT_CLASS);
 
                     final List<EnumType> enumTypeList = itemsRootElement.getEnumTypes().getEnumTypes();
                     final String enumValidationMessage = ENUM_TYPE_VALIDATION.validateGeneratedClasses(
@@ -170,7 +172,7 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
     @Override
     public void projectOpened(final Project project) {
         this.itemsPropertiesListener = new ItemsPropertiesChangedListener(project);
-        VirtualFileManager.getInstance().addVirtualFileListener(itemsPropertiesListener);
+        VirtualFileManager.getInstance().addVirtualFileListener(this.itemsPropertiesListener);
     }
 
     @Override
