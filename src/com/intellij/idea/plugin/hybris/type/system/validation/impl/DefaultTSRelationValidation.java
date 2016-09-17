@@ -30,6 +30,7 @@ import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -111,8 +112,7 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
         }
 
         for (final PsiField classField : classItem.getAllFields()) {
-            if (classField.getName().endsWith(fieldName))//todo: ignore case
-            {
+            if (StringUtils.endsWithIgnoreCase(classField.getName(), fieldName)) {
                 return false;
             }
         }
@@ -123,7 +123,7 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
     @NotNull
     private Map<String, PsiClass> filterClassesWithRelations(
         @NotNull final Map<String, PsiClass> generatedClasses,
-        @NotNull final List<Relation> relationsList
+        @NotNull final Collection<Relation> relationsList
     ) {
 
         final Map<String, PsiClass> filteredClasses = new HashMap<>();

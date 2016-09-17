@@ -127,7 +127,7 @@ public abstract class AbstractTSClassesValidation<T, M> {
         for (final PsiField generatedField : generatedClass.getAllFields()) {
             filedName = this.buildPropertyName(field);
 
-            if (generatedField.getName().toLowerCase().endsWith(filedName.toLowerCase())) {
+            if (StringUtils.endsWithIgnoreCase(generatedField.getName(), filedName)) {
                 return generatedField;
             }
         }
@@ -147,7 +147,7 @@ public abstract class AbstractTSClassesValidation<T, M> {
         Validate.notNull(generatedClasses);
 
         for (final PsiClass psiClass : generatedClasses) {
-            if (psiClass.getName().endsWith(this.buildGeneratedClassName(xmlType))) {
+            if (StringUtils.endsWith(psiClass.getName(), this.buildGeneratedClassName(xmlType))) {
                 return psiClass;
             }
         }
