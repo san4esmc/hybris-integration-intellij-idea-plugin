@@ -85,8 +85,8 @@ public interface HybrisConstants {
     String PLATFORM_LIBRARY_GROUP = "Platform Bootstrap";
 
     String WEBINF_LIB_DIRECTORY = "webroot/WEB-INF/lib";
-    String WEB_WEBINF_LIB_DIRECTORY = WEB_MODULE_DIRECTORY+"/"+WEBINF_LIB_DIRECTORY;
-    String COMMONWEB_WEBINF_LIB_DIRECTORY = COMMON_WEB_MODULE_DIRECTORY+"/"+WEBINF_LIB_DIRECTORY;
+    String WEB_WEBINF_LIB_DIRECTORY = WEB_MODULE_DIRECTORY + "/" + WEBINF_LIB_DIRECTORY;
+    String COMMONWEB_WEBINF_LIB_DIRECTORY = COMMON_WEB_MODULE_DIRECTORY + "/" + WEBINF_LIB_DIRECTORY;
     String WEB_INF_CLASSES_DIRECTORY = "web/webroot/WEB-INF/classes";
     String WEB_SRC_DIRECTORY = "web/src";
     String HMC_LIB_DIRECTORY = "hmc/bin";
@@ -114,4 +114,11 @@ public interface HybrisConstants {
     String CONFIGURATOR_FACTORY_ID = "ccom.intellij.idea.plugin.hybris.impex.hybrisConfiguratorFactory";
 
     int MAX_EXISTING_MODULE_NAMES = 20;
+
+    String ITEMS_XML_FILE = "-items.xml";
+    String ITEM_ROOT_CLASS = "de.hybris.platform.core.model.ItemModel";
+    String ENUM_ROOT_CLASS = "de.hybris.platform.core.HybrisEnumValue";
+    String MODEL_SUFFIX = "Model";
+    String FIELD_PREFIX = "_";
+    String LOCALIZED_PREFIX = "localized";
 }

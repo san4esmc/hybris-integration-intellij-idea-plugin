@@ -25,17 +25,16 @@ import com.intellij.idea.plugin.hybris.type.system.validation.AbstractTSClassesV
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.List;
+
+import static com.intellij.idea.plugin.hybris.common.HybrisConstants.FIELD_PREFIX;
+import static com.intellij.idea.plugin.hybris.common.HybrisConstants.LOCALIZED_PREFIX;
+import static com.intellij.idea.plugin.hybris.common.HybrisConstants.MODEL_SUFFIX;
 
 /**
  * @author Vlad Bozhenok <vladbozhenok@gmail.com>
  */
 public class ItemTypeClassValidation extends AbstractTSClassesValidation<ItemType, Attribute> {
-
-    private static final String MODEL_SUFFIX = "Model";
-    private static final String FIELD_PREFIX = "_";
-    private static final String LOCALIZED_PREFIX = "localized";
 
     @Override
     public List<Attribute> getItemFields(@NotNull final ItemType item) {

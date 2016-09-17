@@ -18,6 +18,7 @@
 
 package com.intellij.idea.plugin.hybris.type.system.validation.impl;
 
+import com.intellij.idea.plugin.hybris.common.HybrisConstants;
 import com.intellij.idea.plugin.hybris.common.utils.HybrisI18NBundleUtils;
 import com.intellij.idea.plugin.hybris.type.system.common.TSMessages;
 import com.intellij.idea.plugin.hybris.type.system.model.Relation;
@@ -37,8 +38,6 @@ import java.util.Map;
  * @author Vlad Bozhenok <vladbozhenok@gmail.com>
  */
 public class DefaultTSRelationValidation implements TSRelationsValidation {
-
-    private static final String MODEL_SUFFIX = "Model";
 
     @NotNull
     @Override
@@ -153,7 +152,7 @@ public class DefaultTSRelationValidation implements TSRelationsValidation {
         Validate.notNull(mapToFill);
         Validate.notNull(itemName);
 
-        final PsiClass psiClass = generatedClasses.get(itemName + MODEL_SUFFIX);
+        final PsiClass psiClass = generatedClasses.get(itemName + HybrisConstants.MODEL_SUFFIX);
 
         if (null != psiClass && !mapToFill.containsKey(itemName)) {
             mapToFill.put(itemName, psiClass);

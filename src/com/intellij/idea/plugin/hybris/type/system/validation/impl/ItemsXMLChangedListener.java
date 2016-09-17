@@ -18,6 +18,7 @@
 
 package com.intellij.idea.plugin.hybris.type.system.validation.impl;
 
+import com.intellij.idea.plugin.hybris.common.HybrisConstants;
 import com.intellij.idea.plugin.hybris.common.services.NotificationSender;
 import com.intellij.idea.plugin.hybris.common.services.impl.NotificationSenderImpl;
 import com.intellij.idea.plugin.hybris.common.utils.HybrisI18NBundleUtils;
@@ -53,6 +54,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static com.intellij.idea.plugin.hybris.common.HybrisConstants.ENUM_ROOT_CLASS;
+import static com.intellij.idea.plugin.hybris.common.HybrisConstants.ITEMS_XML_FILE;
+import static com.intellij.idea.plugin.hybris.common.HybrisConstants.ITEM_ROOT_CLASS;
+
 /**
  * @author Vlad Bozhenok <vladbozhenok@gmail.com>
  */
@@ -60,14 +65,10 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
 
     private static final Logger LOG = Logger.getInstance(ItemsXMLChangedListener.class);
 
-    private static final String ITEMS_XML_FILE = "-items.xml";
-    private static final String ITEM_ROOT_CLASS = "de.hybris.platform.core.model.ItemModel";
-    private static final String ENUM_ROOT_CLASS = "de.hybris.platform.core.HybrisEnumValue";
     private static final String ITEM_XML_VALIDATION_GROUP = "Items XML validation group";
 
-    private static final NotificationGroup NOTIFICATION_GROUP = new NotificationGroup(ITEM_XML_VALIDATION_GROUP,
-                                                                                      NotificationDisplayType.BALLOON,
-                                                                                      true
+    private static final NotificationGroup NOTIFICATION_GROUP = new NotificationGroup(
+        ITEM_XML_VALIDATION_GROUP, NotificationDisplayType.BALLOON, true
     );
 
     private static final NotificationSender NOTIFICATIONS = new NotificationSenderImpl(NOTIFICATION_GROUP);
@@ -106,7 +107,7 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
                     final Map<String, PsiClass> inheritedItemClasses = ItemsXMLChangedListener.this.findAllInheritClasses(
                         this.project, ITEM_ROOT_CLASS);
                     final Map<String, PsiClass> inheritedEnumClasses = ItemsXMLChangedListener.this.findAllInheritClasses(
-                        this.project, ENUM_ROOT_CLASS);
+                        this.project, HybrisConstants.ENUM_ROOT_CLASS);
 
                     final List<EnumType> enumTypeList = itemsRootElement.getEnumTypes().getEnumTypes();
                     final String enumValidationMessage = ENUM_TYPE_VALIDATION.validateGeneratedClasses(
