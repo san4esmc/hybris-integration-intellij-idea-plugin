@@ -70,15 +70,10 @@ public class NotificationSenderImpl implements NotificationSender {
             return;
         }
 
-        ApplicationManager.getApplication().invokeLater(new Runnable() {
-
-            @Override
-            public void run()
-            {
-                final Notification notification = group.createNotification(message, messageLevel);
-                final Project[] projects = ProjectManager.getInstance().getOpenProjects();
-                Notifications.Bus.notify(notification, projects[0]);
-            }
+        ApplicationManager.getApplication().invokeLater(() -> {
+            final Notification notification = group.createNotification(message, messageLevel);
+            final Project[] projects = ProjectManager.getInstance().getOpenProjects();
+            Notifications.Bus.notify(notification, projects[0]);
         });
 
     }
