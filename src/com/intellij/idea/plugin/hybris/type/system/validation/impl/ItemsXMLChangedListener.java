@@ -44,6 +44,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.util.containers.HashMap;
+import com.intellij.util.xml.DomFileElement;
 import com.intellij.util.xml.DomManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -54,7 +55,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static com.intellij.idea.plugin.hybris.common.HybrisConstants.ENUM_ROOT_CLASS;
 import static com.intellij.idea.plugin.hybris.common.HybrisConstants.ITEMS_XML_FILE;
 import static com.intellij.idea.plugin.hybris.common.HybrisConstants.ITEM_ROOT_CLASS;
 
@@ -93,6 +93,7 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
             if (!event.getFileName().endsWith(ITEMS_XML_FILE)) {
                 return;
             }
+
             try {
 
                 final DomManager domManager = DomManager.getDomManager(this.project);
@@ -101,13 +102,19 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
                 final PsiFile psiFile = psiManager.findFile(event.getFile());
 
                 if (psiFile != null && (psiFile instanceof XmlFile)) {
-                    final Items itemsRootElement = (Items) domManager.getFileElement((XmlFile) psiFile)
-                                                                     .getRootElement();
+                    final DomFileElement<Items> fileElement = domManager.getFileElement((XmlFile) psiFile, Items.class);
+                    if (null == fileElement) {
+                        return;
+                    }
+
+                    final Items itemsRootElement = fileElement.getRootElement();
 
                     final Map<String, PsiClass> inheritedItemClasses = ItemsXMLChangedListener.this.findAllInheritClasses(
-                        this.project, ITEM_ROOT_CLASS);
+                        this.project, ITEM_ROOT_CLASS
+                    );
                     final Map<String, PsiClass> inheritedEnumClasses = ItemsXMLChangedListener.this.findAllInheritClasses(
-                        this.project, HybrisConstants.ENUM_ROOT_CLASS);
+                        this.project, HybrisConstants.ENUM_ROOT_CLASS
+                    );
 
                     final List<EnumType> enumTypeList = itemsRootElement.getEnumTypes().getEnumTypes();
                     final String enumValidationMessage = ENUM_TYPE_VALIDATION.validateGeneratedClasses(
@@ -135,9 +142,7 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
                         || StringUtils.isNotEmpty(relationsValidationMessage)) {
                         NOTIFICATIONS.showWarningMessage(HybrisI18NBundleUtils.message(TSMessages.RUN_ANT_CLEAN_ALL));
                     }
-
                 }
-
             } catch (Exception e) {
                 LOG.error(String.format("Items validation error. File: %s", event.getFileName()), e);
             }
@@ -150,7 +155,6 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
         @NotNull final Project project,
         @NotNull final String rootClass
     ) {
-
         Validate.notNull(project);
         Validate.notNull(rootClass);
 
