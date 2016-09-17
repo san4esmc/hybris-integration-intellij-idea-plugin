@@ -25,9 +25,9 @@ import com.intellij.idea.plugin.hybris.type.system.validation.TSRelationsValidat
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiField;
 import org.jetbrains.annotations.NotNull;
-import com.sun.istack.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
