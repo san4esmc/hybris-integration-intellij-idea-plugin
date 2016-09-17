@@ -21,8 +21,8 @@ package com.intellij.idea.plugin.hybris.type.system.validation.impl;
 import com.intellij.idea.plugin.hybris.type.system.model.EnumType;
 import com.intellij.idea.plugin.hybris.type.system.model.EnumValue;
 import com.intellij.idea.plugin.hybris.type.system.validation.AbstractTSClassesValidation;
-import org.jetbrains.annotations.NotNull;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -32,38 +32,31 @@ import java.util.List;
 public class EnumTypeClassValidation extends AbstractTSClassesValidation<EnumType, EnumValue> {
 
     @Override
-    public String buildGeneratedClassName(@NotNull final EnumType enumType)
-    {
-        if(null == enumType || null == enumType.getCode())
-        {
+    public String buildGeneratedClassName(final EnumType item) {
+        if (null == item) {
             return StringUtils.EMPTY;
         }
-        return enumType.getCode().toString();
+        return item.getCode().toString();
     }
 
     @Override
-    public String buildItemName(@NotNull final EnumType enumType)
-    {
-        if(null == enumType || null == enumType.getCode())
-        {
+    public String buildItemName(final EnumType item) {
+        if (null == item) {
             return StringUtils.EMPTY;
         }
-        return enumType.getCode().toString();
+        return item.getCode().toString();
     }
 
     @Override
-    public String buildPropertyName(@NotNull final EnumValue enumValue)
-    {
-        if(null == enumValue || null == enumValue.getCode())
-        {
+    public String buildPropertyName(final EnumValue property) {
+        if (null == property) {
             return StringUtils.EMPTY;
         }
-        return enumValue.getCode().toString();
+        return property.getCode().toString();
     }
 
     @Override
-    public List<EnumValue> getItemFields(@NotNull final EnumType enumType)
-    {
-        return  enumType.getValues();
+    public List<EnumValue> getItemFields(@NotNull final EnumType item) {
+        return item.getValues();
     }
 }

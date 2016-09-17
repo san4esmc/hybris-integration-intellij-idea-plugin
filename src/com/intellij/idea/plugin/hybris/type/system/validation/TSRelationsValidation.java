@@ -32,7 +32,9 @@ import java.util.Map;
 public interface TSRelationsValidation {
 
     @NotNull
-    String validateRelations(@NotNull Map<String, PsiClass> generatedClasses,
-                             @Nullable List<Relation> relationsList);
+    String validateRelations(
+        @NotNull Map<String, PsiClass> generatedClasses,
+        @Nullable List<Relation> relationsList
+    );
 
 }

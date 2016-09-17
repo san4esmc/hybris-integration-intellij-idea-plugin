@@ -22,10 +22,10 @@ import com.intellij.idea.plugin.hybris.type.system.model.Attribute;
 import com.intellij.idea.plugin.hybris.type.system.model.Attributes;
 import com.intellij.idea.plugin.hybris.type.system.model.ItemType;
 import com.intellij.idea.plugin.hybris.type.system.validation.AbstractTSClassesValidation;
-import org.jetbrains.annotations.NotNull;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,48 +38,41 @@ public class ItemTypeClassValidation extends AbstractTSClassesValidation<ItemTyp
     private static final String LOCALIZED_PREFIX = "localized";
 
     @Override
-    public List<Attribute> getItemFields(@NotNull final ItemType item)
-    {
+    public List<Attribute> getItemFields(@NotNull final ItemType item) {
         final Attributes attributes = item.getAttributes();
-        if(null == attributes)
-        {
-            return (List<Attribute>)CollectionUtils.EMPTY_COLLECTION;
-        }
+
         return attributes.getAttributes();
     }
 
     @Override
-    public String buildGeneratedClassName(final ItemType item)
-    {
-        if(null == item || null == item.getCode())
-        {
+    public String buildGeneratedClassName(final ItemType item) {
+        if (null == item) {
             return StringUtils.EMPTY;
         }
+
         return item.getCode() + MODEL_SUFFIX;
     }
 
     @Override
-    public String buildItemName(final ItemType item)
-    {
-        if(null == item || null == item.getCode())
-        {
+    public String buildItemName(final ItemType item) {
+        if (null == item) {
             return StringUtils.EMPTY;
         }
+
         return item.getCode().toString();
     }
 
     @Override
-    public String buildPropertyName(final Attribute property)
-    {
-        if(null == property)
-        {
+    public String buildPropertyName(final Attribute property) {
+        if (null == property) {
             return StringUtils.EMPTY;
         }
+
         final String attributeTypeName = property.getType().toString().toLowerCase();
-        if(attributeTypeName.startsWith(LOCALIZED_PREFIX))
-        {
+        if (attributeTypeName.startsWith(LOCALIZED_PREFIX)) {
             return property.getQualifier().toString();
         }
+
         return FIELD_PREFIX + property.getQualifier().toString();
     }
 }

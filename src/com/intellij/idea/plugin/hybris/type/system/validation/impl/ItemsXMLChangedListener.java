@@ -44,12 +44,12 @@ import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.util.containers.HashMap;
 import com.intellij.util.xml.DomManager;
-import org.jetbrains.annotations.NotNull;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -66,7 +66,9 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
     private static final String ITEM_XML_VALIDATION_GROUP = "Items XML validation group";
 
     private static final NotificationGroup NOTIFICATION_GROUP = new NotificationGroup(ITEM_XML_VALIDATION_GROUP,
-                                           NotificationDisplayType.BALLOON, true);
+                                                                                      NotificationDisplayType.BALLOON,
+                                                                                      true
+    );
 
     private static final NotificationSender NOTIFICATIONS = new NotificationSenderImpl(NOTIFICATION_GROUP);
 
@@ -80,58 +82,60 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
 
         private Project project;
 
-        public ItemsPropertiesChangedListener(final Project project)
-        {
+        public ItemsPropertiesChangedListener(final Project project) {
             super();
             this.project = project;
         }
 
         @Override
-        public void contentsChanged(VirtualFileEvent event)
-        {
-            if (!event.getFileName().endsWith(ITEMS_XML_FILE))
-            {
+        public void contentsChanged(@NotNull final VirtualFileEvent event) {
+            if (!event.getFileName().endsWith(ITEMS_XML_FILE)) {
                 return;
             }
-            try
-            {
+            try {
 
                 final DomManager domManager = DomManager.getDomManager(project);
 
                 final PsiManager psiManager = PsiManager.getInstance(project);
                 final PsiFile psiFile = psiManager.findFile(event.getFile());
 
-                if (psiFile != null && (psiFile instanceof XmlFile))
-                {
-                    final Items itemsRootElement = (Items) domManager.getFileElement((XmlFile) psiFile).getRootElement();
+                if (psiFile != null && (psiFile instanceof XmlFile)) {
+                    final Items itemsRootElement = (Items) domManager.getFileElement((XmlFile) psiFile)
+                                                                     .getRootElement();
 
                     final Map<String, PsiClass> inheritedItemClasses = findAllInheritClasses(project, ITEM_ROOT_CLASS);
                     final Map<String, PsiClass> inheritedEnumClasses = findAllInheritClasses(project, ENUM_ROOT_CLASS);
 
                     final List<EnumType> enumTypeList = itemsRootElement.getEnumTypes().getEnumTypes();
-                    final String enumValidationMessage = ENUM_TYPE_VALIDATION.validateGeneratedClasses(enumTypeList, inheritedEnumClasses);
-                    NOTIFICATIONS.showWarningMessage(enumValidationMessage );
+                    final String enumValidationMessage = ENUM_TYPE_VALIDATION.validateGeneratedClasses(
+                        enumTypeList,
+                        inheritedEnumClasses
+                    );
+                    NOTIFICATIONS.showWarningMessage(enumValidationMessage);
 
                     final List<ItemType> itemTypeList = itemsRootElement.getItemTypes().getItemTypes();
-                    final String itemsValidationMessage = ITEM_TYPE_VALIDATION.validateGeneratedClasses(itemTypeList, inheritedItemClasses);
-                    NOTIFICATIONS.showWarningMessage(itemsValidationMessage );
+                    final String itemsValidationMessage = ITEM_TYPE_VALIDATION.validateGeneratedClasses(
+                        itemTypeList,
+                        inheritedItemClasses
+                    );
+                    NOTIFICATIONS.showWarningMessage(itemsValidationMessage);
 
                     final List<Relation> relationsList = itemsRootElement.getRelations().getRelations();
-                    final String relationsValidationMessage = RELATIONS_VALIDATION.validateRelations(inheritedItemClasses, relationsList);
-                    NOTIFICATIONS.showWarningMessage(relationsValidationMessage );
+                    final String relationsValidationMessage = RELATIONS_VALIDATION.validateRelations(
+                        inheritedItemClasses,
+                        relationsList
+                    );
+                    NOTIFICATIONS.showWarningMessage(relationsValidationMessage);
 
-                    if(StringUtils.isNotEmpty(enumValidationMessage)
-                       || StringUtils.isNotEmpty(itemsValidationMessage)
-                       || StringUtils.isNotEmpty(relationsValidationMessage) )
-                    {
+                    if (StringUtils.isNotEmpty(enumValidationMessage)
+                        || StringUtils.isNotEmpty(itemsValidationMessage)
+                        || StringUtils.isNotEmpty(relationsValidationMessage)) {
                         NOTIFICATIONS.showWarningMessage(HybrisI18NBundleUtils.message(TSMessages.RUN_ANT_CLEAN_ALL));
                     }
 
                 }
 
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 LOG.error(String.format("Items validation error. File: %s", event.getFileName()), e);
             }
         }
@@ -139,9 +143,10 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
 
 
     @NotNull
-    private Map<String, PsiClass> findAllInheritClasses(@NotNull final Project project,
-                                                       @NotNull final String rootClass)
-    {
+    private Map<String, PsiClass> findAllInheritClasses(
+        @NotNull final Project project,
+        @NotNull final String rootClass
+    ) {
 
         Validate.notNull(project);
         Validate.notNull(rootClass);
@@ -149,15 +154,13 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
         final PsiClass itemRootClass = JavaPsiFacade.getInstance(project).findClass(
             rootClass, GlobalSearchScope.allScope(project));
 
-        if (null == itemRootClass)
-        {
-            return MapUtils.EMPTY_MAP;
+        if (null == itemRootClass) {
+            return Collections.emptyMap();
         }
 
         final Collection<PsiClass> foundClasses = ClassInheritorsSearch.search(itemRootClass).findAll();
         final Map<String, PsiClass> result = new HashMap<>();
-        for(final PsiClass psiClass: foundClasses)
-        {
+        for (final PsiClass psiClass : foundClasses) {
             result.put(psiClass.getName(), psiClass);
         }
         return result;
@@ -165,8 +168,7 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
     }
 
     @Override
-    public void projectOpened(final Project project)
-    {
+    public void projectOpened(final Project project) {
         this.itemsPropertiesListener = new ItemsPropertiesChangedListener(project);
         VirtualFileManager.getInstance().addVirtualFileListener(itemsPropertiesListener);
     }
@@ -185,6 +187,4 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
     public void projectClosing(final Project project) {
 
     }
-
-
 }
