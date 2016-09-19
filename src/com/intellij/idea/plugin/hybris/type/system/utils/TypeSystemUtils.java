@@ -16,28 +16,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.intellij.idea.plugin.hybris.project.settings;
+package com.intellij.idea.plugin.hybris.type.system.utils;
 
-import com.intellij.idea.plugin.hybris.project.exceptions.HybrisConfigurationException;
-import org.jetbrains.annotations.NotNull;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.Collections;
+import com.intellij.idea.plugin.hybris.common.HybrisConstants;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.xml.XmlFile;
+import org.jetbrains.annotations.Nullable;
 
 /**
- * Created by Martin Zdarsky-Jones on 19/08/2016.
+ * Created 6:46 PM 18 September 2016.
+ *
+ * @author Alexander Bartash <AlexanderBartash@gmail.com>
  */
-public class CustomHybrisModuleDescriptor extends RegularHybrisModuleDescriptor {
+public final class TypeSystemUtils {
 
-    public CustomHybrisModuleDescriptor(
-        @NotNull final File moduleRootDirectory,
-        @NotNull final HybrisProjectDescriptor rootProjectDescriptor
-    ) throws HybrisConfigurationException {
-        super(moduleRootDirectory, rootProjectDescriptor);
+    public static boolean isTypeSystemXmlFile(@Nullable final PsiFile psiFile) {
+        return psiFile instanceof XmlFile && psiFile.getName().endsWith(HybrisConstants.HYBRIS_ITEMS_XML_FILE_ENDING);
     }
 
-    protected Collection<? extends String> getAdditionalRequiredExtensionNames() {
-        return Collections.emptySet();
-    }
 }

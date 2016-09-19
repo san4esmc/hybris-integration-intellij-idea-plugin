@@ -21,15 +21,8 @@ package com.intellij.idea.plugin.hybris.type.system.inspections;
 import com.intellij.codeInspection.InspectionManager;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 
 interface ValidateContext {
 
@@ -42,46 +35,5 @@ interface ValidateContext {
     InspectionManager getManager();
 
     @NotNull
-    MyXPath getXPath();
-
-    @NotNull
     PsiElement mapNodeToPsi(@NotNull Node xmlNode);
-
-    class MyXPath {
-
-        private final XPath myXPath = XPathFactory.newInstance().newXPath();
-
-        @NotNull
-        public NodeList computeNodeSet(@Nullable final String xpath, @NotNull final Object start)
-        throws XPathExpressionException {
-            if (xpath == null) {
-                return EMPTY_NODE_LIST;
-            }
-
-            return (NodeList) this.myXPath.evaluate(xpath, start, XPathConstants.NODESET);
-        }
-
-        public boolean computeBoolean(@Nullable final String xpath, @NotNull final Object start)
-        throws XPathExpressionException {
-            if (xpath == null) {
-                return false;
-            }
-
-            final Object result = this.myXPath.evaluate(xpath, start, XPathConstants.BOOLEAN);
-            return Boolean.TRUE.equals(result);
-        }
-
-        private static NodeList EMPTY_NODE_LIST = new NodeList() {
-
-            @Override
-            public Node item(final int index) {
-                return null;
-            }
-
-            @Override
-            public int getLength() {
-                return 0;
-            }
-        };
-    }
 }

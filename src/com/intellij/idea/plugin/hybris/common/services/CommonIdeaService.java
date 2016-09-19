@@ -21,7 +21,10 @@ package com.intellij.idea.plugin.hybris.common.services;
 
 import com.intellij.openapi.project.Project;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 /**
  * Created 10:20 PM 10 February 2016.
@@ -35,4 +38,6 @@ public interface CommonIdeaService {
     @Nullable
     Project getProject();
 
+    @NotNull
+    Optional<String> getCustomDirectory(@NotNull Project project);
 }

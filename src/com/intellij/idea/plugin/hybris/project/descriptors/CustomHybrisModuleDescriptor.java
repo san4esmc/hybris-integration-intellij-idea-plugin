@@ -16,19 +16,28 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.intellij.idea.plugin.hybris.project.configurators;
+package com.intellij.idea.plugin.hybris.project.descriptors;
 
-import com.intellij.idea.plugin.hybris.project.descriptors.HybrisProjectDescriptor;
-import com.intellij.openapi.module.ModifiableModuleModel;
+import com.intellij.idea.plugin.hybris.project.exceptions.HybrisConfigurationException;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Created 12:24 AM 25 June 2015.
- *
- * @author Alexander Bartash <AlexanderBartash@gmail.com>
- */
-public interface ModulesDependenciesConfigurator {
+import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
 
-    void configure(@NotNull HybrisProjectDescriptor hybrisProjectDescriptor,
-                   @NotNull ModifiableModuleModel rootProjectModifiableModuleModel);
+/**
+ * Created by Martin Zdarsky-Jones on 19/08/2016.
+ */
+public class CustomHybrisModuleDescriptor extends RegularHybrisModuleDescriptor {
+
+    public CustomHybrisModuleDescriptor(
+        @NotNull final File moduleRootDirectory,
+        @NotNull final HybrisProjectDescriptor rootProjectDescriptor
+    ) throws HybrisConfigurationException {
+        super(moduleRootDirectory, rootProjectDescriptor);
+    }
+
+    protected Collection<? extends String> getAdditionalRequiredExtensionNames() {
+        return Collections.emptySet();
+    }
 }
