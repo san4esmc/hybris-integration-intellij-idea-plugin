@@ -326,14 +326,6 @@
                             serviceImplementation="com.intellij.idea.plugin.hybris.common.services.impl.DefaultVirtualFileSystemService"/>
 
     </extensions>
-    
-    <application-components>
-        <component>
-            <implementation-class>
-                com.intellij.idea.plugin.hybris.type.system.validation.TypeSystemValidationComponent
-            </implementation-class>
-        </component>
-    </application-components>
 
     <actions>
         <!--

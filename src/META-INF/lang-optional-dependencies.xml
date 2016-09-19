@@ -133,6 +133,11 @@
                 com.intellij.idea.plugin.hybris.impex.assistance.ImpexHeaderHighlighterComponent
             </implementation-class>
         </component>
+        <component>
+            <implementation-class>
+                com.intellij.idea.plugin.hybris.type.system.validation.TypeSystemValidationComponent
+            </implementation-class>
+        </component>
     </application-components>
 
     <actions>
