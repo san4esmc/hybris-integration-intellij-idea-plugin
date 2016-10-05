@@ -17,37 +17,29 @@ See the GNU Lesser General Public License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-## hybris integration Intellij IDEA Plugin ##
+## Hybris Integration Intellij IDEA Plugin ##
 
 This plugin provides [hybris](https://hybris.com/ru/) integration into [Intellij IDEA](https://www.jetbrains.com/idea/) and another IDE based on it.
 You can install this plugin to your IDE directly from the [repository](https://plugins.jetbrains.com/plugin/7525) by clicking on the ["Browse Repositories"](https://www.jetbrains.com/idea/help/installing-updating-and-uninstalling-repository-plugins.html) button in Settings/Plugins dialog.
 
-## Features ##
-
-* Import of hybris extensions into IDEA with automatic modules configuration and dependencies management.
-* Syntax highlighting, autocompletion, code formatting and general code assistance for hybris Impex files.
-* Automatic Spring facet configuration (only Ultimate IDEA). 
-
-## Guides ##
-
-* [How to import hybris project using Intellij IDEA "hybris integration" plugin](https://www.youtube.com/watch?v=_wVbowe39GM)
-* [How to use HotSwap in hybris with Oracle JDK and DCEVM OpenJDK](https://www.youtube.com/watch?v=I-YYKD0OSyY)
-
 ## Contribution guidelines ##
 
 * Please read [Contributor License Agreement](http://developercertificate.org/)
-* Be sure to include into your patch, pull request or commit message the following line: "Signed-off-by: Your Real Name <your.email@email.com>" otherwise it can not be accepted. Use your real name (sorry, no pseudonyms or anonymous contributions).
-* [How To Configure Project Environment](https://bitbucket.org/AlexanderBartash/impex-editor-intellij-idea-plugin/wiki/How%20To%20Configure%20Project%20Environment)
-* Available tasks [here](https://hybris-integration.atlassian.net/projects/IIP/issues) also you can suggest new features.
+* Available tasks are in our [JIRA](https://hybris-integration.atlassian.net/projects/IIP) also you can suggest new features or report bugs without login on our [Support Desk](https://hybris-integration.atlassian.net/projects/IIPS) it has anonymous access.
+* [How To Configure Project Environment](https://bitbucket.org/AlexanderBartash/hybris-integration-intellij-idea-plugin/wiki/How%20To%20Configure%20Project%20Environment)
+* We are working with [Pull Requests](https://www.atlassian.com/git/tutorials/making-a-pull-request/) because it allows us to review the code before merging it. You need to fork this repository, implement a feature in a separate branch, then send us a pull request.
+* Be sure to include into your pull request and all commit messages the following line: "Signed-off-by: Your Real Name <your.email@email.com>" otherwise it can not be accepted. Use your real name (sorry, no pseudonyms or anonymous contributions).
 * Also you can find useful information in our [wiki](https://bitbucket.org/AlexanderBartash/hybris-integration-intellij-idea-plugin/wiki/Home).
-* For additional questions feel free to send me an email.
+* For additional questions you can send an email to AlexanderBartash@gmail.com or Martin.Zdarsky@hybris.com
 
 ## Who do I talk to? ##
 
-* Repo owner: <AlexanderBartash@gmail.com>
+* AlexanderBartash@gmail.com
+* Martin.Zdarsky@hybris.com
 
 ## Credits ##
 * Vlad Bozhenok
-* Markus Priegl
 * Martin Zdarsky-Jones
+* Michael Golubev
+* Markus Priegl
 * Sergei Aksenenko

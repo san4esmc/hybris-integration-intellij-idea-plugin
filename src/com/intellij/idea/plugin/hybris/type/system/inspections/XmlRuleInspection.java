@@ -22,11 +22,15 @@ import com.intellij.codeInspection.InspectionManager;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemDescriptor;
 import com.intellij.codeInspection.ProblemHighlightType;
+import com.intellij.idea.plugin.hybris.common.HybrisConstants;
 import com.intellij.idea.plugin.hybris.common.services.CommonIdeaService;
+import com.intellij.idea.plugin.hybris.project.descriptors.HybrisModuleDescriptor.DescriptorType;
 import com.intellij.idea.plugin.hybris.type.system.utils.TypeSystemUtils;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleUtilCore;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
@@ -39,13 +43,14 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.xpath.XPathExpressionException;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
+import static com.intellij.openapi.util.io.FileUtil.normalize;
 import static com.intellij.idea.plugin.hybris.common.HybrisConstants.RULESET_XML;
 
 public class XmlRuleInspection extends LocalInspectionTool {
@@ -92,27 +97,34 @@ public class XmlRuleInspection extends LocalInspectionTool {
             return false;
         }
 
-        final CommonIdeaService commonIdeaService = ServiceManager.getService(CommonIdeaService.class);
-        final Optional<String> optionalCustomDir = commonIdeaService.getCustomDirectory(file.getProject());
+        final Module module = ModuleUtilCore.findModuleForPsiElement(file);
+        final String descriptorTypeName = module.getOptionValue(HybrisConstants.DESCRIPTOR_TYPE);
 
-        //FIXME: workaround to always enable validation in test projects without hybris settings
-        if (!optionalCustomDir.isPresent() && this.shouldCheckFilesWithoutHybrisSettings()) {
-            return true;
+        if (descriptorTypeName == null) {
+            if (shouldCheckFilesWithoutHybrisSettings(file.getProject())) {
+                return estimateIsCustomExtension(file);
+            }
+            return false;
         }
 
-        final String DEFAULT_LOCATION = "bin" + VfsUtilCore.VFS_SEPARATOR_CHAR + "custom";
-        String customDir = optionalCustomDir.orElse(DEFAULT_LOCATION);
+        final DescriptorType descriptorType = DescriptorType.valueOf(descriptorTypeName);
+        return descriptorType == DescriptorType.CUSTOM;
+    }
 
-        //next line enforces <code>customDit.endsWith(VfsUtilCore.VFS_SEPARATOR_CHAR)</code>
-        customDir = StringUtil.trimEnd(customDir, VfsUtilCore.VFS_SEPARATOR_CHAR) + VfsUtilCore.VFS_SEPARATOR_CHAR;
+    /*
+     * This method disqualifies known hybris extensions. Anything else is considered for TSV validation.
+     */
+    private boolean estimateIsCustomExtension(final PsiFileSystemItem file) {
+        final File itemsfile = VfsUtilCore.virtualToIoFile(file.getVirtualFile());
+        final String itemsfilePath = normalize(itemsfile.getAbsolutePath());
 
-        //FIXME: revisit: according to DefaultHybrisProjectImportBuilder#saveCustomDirectoryLocation
-        //FIXME: customDir is stored as a relative path from hybris home
-        //FIXME: However, I don't see how to access the hybris home here, so will assume that
-        //FIXME: it is the somewhere under project base directory
-        //FIXME: Hence, we are checking contains() instead of some kind of startsWith(..)
-        final String relativePath = VfsUtilCore.getRelativePath(file.getVirtualFile(), file.getProject().getBaseDir());
-        return relativePath != null && relativePath.contains(customDir);
+        if (itemsfilePath.contains(normalize(HybrisConstants.HYBRIS_OOTB_MODULE_PREFIX))) {
+            return false;
+        }
+        if (itemsfilePath.contains(normalize(HybrisConstants.PLATFORM_EXT_MODULE_PREFIX))) {
+            return false;
+        }
+        return true;
     }
 
     @NotNull
@@ -163,9 +175,10 @@ public class XmlRuleInspection extends LocalInspectionTool {
         );
     }
 
-    protected boolean shouldCheckFilesWithoutHybrisSettings() {
-        //probably it is a test project where we DO want to show warnings
-        return true;
+    protected boolean shouldCheckFilesWithoutHybrisSettings(@NotNull final Project project) {
+        // at least it needs to have hybris flag
+        final CommonIdeaService commonIdeaService = ServiceManager.getService(CommonIdeaService.class);
+        return commonIdeaService.isHybrisProject(project);
     }
 
     private XmlRule[] loadRules() throws IOException {

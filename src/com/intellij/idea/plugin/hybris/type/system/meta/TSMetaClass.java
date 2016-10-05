@@ -28,22 +28,25 @@ import java.util.stream.Stream;
 /**
  * Created by Martin Zdarsky-Jones (martin.zdarsky@hybris.com) on 15/06/2016.
  */
-public interface TSMetaClass {
-
-    @NotNull
-    String getName();
+public interface TSMetaClass extends TSMetaClassifier<ItemType> {
 
     @Nullable
     String getExtendedMetaClassName();
 
     @NotNull
-    Iterable<? extends TSMetaProperty> getProperties();
+    Stream<? extends TSMetaProperty> getPropertiesStream(boolean includeInherited);
 
     @NotNull
-    Stream<? extends TSMetaProperty> getPropertiesStream();
+    Collection<? extends TSMetaProperty> findPropertiesByName(@NotNull String name, boolean includeInherited);
 
     @NotNull
-    Collection<? extends TSMetaProperty> findPropertiesByName(@NotNull String name);
+    Collection<? extends TSMetaReference.ReferenceEnd> findReferenceEndsByRole(
+        @NotNull String role,
+        boolean includeInherited
+    );
+
+    @NotNull
+    Stream<? extends TSMetaReference.ReferenceEnd> getReferenceEndsStream(boolean includeInherited);
 
     @NotNull
     Stream<? extends ItemType> getAllDomsStream();

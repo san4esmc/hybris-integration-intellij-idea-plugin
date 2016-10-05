@@ -32,6 +32,8 @@ public class HybrisProjectSettings {
 
     protected boolean hybisProject;
     protected String customDirectory;
+    protected String hybrisDirectory;
+    protected String importedByVersion;
 
     public boolean isHybisProject() {
         return hybisProject;
@@ -49,11 +51,29 @@ public class HybrisProjectSettings {
         this.customDirectory = customDirectory;
     }
 
+    public String getHybrisDirectory() {
+        return hybrisDirectory;
+    }
+
+    public void setHybrisDirectory(final String hybrisDirectory) {
+        this.hybrisDirectory = hybrisDirectory;
+    }
+
+    public String getImportedByVersion() {
+        return importedByVersion;
+    }
+
+    public void setImportedByVersion(final String importedByVersion) {
+        this.importedByVersion = importedByVersion;
+    }
+
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
             .append(hybisProject)
             .append(customDirectory)
+            .append(hybrisDirectory)
+            .append(importedByVersion)
             .toHashCode();
     }
 
@@ -72,6 +92,8 @@ public class HybrisProjectSettings {
         return new EqualsBuilder()
             .append(hybisProject, other.hybisProject)
             .append(customDirectory, other.customDirectory)
+            .append(hybrisDirectory, other.hybrisDirectory)
+            .append(importedByVersion, other.importedByVersion)
             .isEquals();
     }
 
@@ -80,6 +102,8 @@ public class HybrisProjectSettings {
         final StringBuilder sb = new StringBuilder("HybrisProjectSettings{");
         sb.append("hybisProject=").append(hybisProject);
         sb.append("customDirectoryPath=").append(customDirectory);
+        sb.append("hybrisDirectory=").append(hybrisDirectory);
+        sb.append("importedByVersion=").append(importedByVersion);
         sb.append('}');
         return sb.toString();
     }

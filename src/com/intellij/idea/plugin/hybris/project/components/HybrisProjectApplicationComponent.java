@@ -16,32 +16,33 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.intellij.idea.plugin.hybris.common.services;
+package com.intellij.idea.plugin.hybris.project.components;
 
-
-import com.intellij.openapi.project.Project;
+import com.intellij.openapi.components.ApplicationComponent;
+import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.project.ProjectManagerListener;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
-
 /**
- * Created 10:20 PM 10 February 2016.
- *
- * @author Alexander Bartash <AlexanderBartash@gmail.com>
+ * Created by Martin zdarsky-Jones on 29/09/2016.
  */
-public interface CommonIdeaService {
+public class HybrisProjectApplicationComponent implements ApplicationComponent {
 
-    boolean isTypingActionInProgress();
+    private ProjectManagerListener projectManagerListener = new HybrisProjectManagerListener();
+
+    @Override
+    public void initComponent() {
+        ProjectManager.getInstance().addProjectManagerListener(this.projectManagerListener);
+    }
+
+    @Override
+    public void disposeComponent() {
+        ProjectManager.getInstance().removeProjectManagerListener(this.projectManagerListener);
+    }
 
     @NotNull
-    Optional<String> getHybrisDirectory(@NotNull Project project);
-
-    @NotNull
-    Optional<String> getCustomDirectory(@NotNull Project project);
-
-    boolean isHybrisProject(@NotNull Project project);
-
-    boolean isOutDatedHybrisProject(@NotNull Project project);
-
-    boolean isPotentiallyHybrisProject(@NotNull Project project);
+    @Override
+    public String getComponentName() {
+        return this.getClass().getName();
+    }
 }

@@ -34,4 +34,9 @@ public class OotbHybrisModuleDescriptor extends RegularHybrisModuleDescriptor {
     ) throws HybrisConfigurationException {
         super(moduleRootDirectory, rootProjectDescriptor);
     }
+
+    @Override
+    public DescriptorType getDescriptorType() {
+        return DescriptorType.OOTB;
+    }
 }

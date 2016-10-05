@@ -16,32 +16,22 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.intellij.idea.plugin.hybris.common.services;
+package com.intellij.idea.plugin.hybris.type.system.meta.impl;
 
-
-import com.intellij.openapi.project.Project;
+import com.intellij.idea.plugin.hybris.type.system.meta.TSMetaEnum;
+import com.intellij.idea.plugin.hybris.type.system.model.EnumType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
+public class TSMetaEnumImpl extends TSMetaEntityImpl<EnumType> implements TSMetaEnum {
 
-/**
- * Created 10:20 PM 10 February 2016.
- *
- * @author Alexander Bartash <AlexanderBartash@gmail.com>
- */
-public interface CommonIdeaService {
+    public TSMetaEnumImpl(final String name, final EnumType dom) {
+        super(name, dom);
+    }
 
-    boolean isTypingActionInProgress();
+    public static String extractName(@NotNull final EnumType domEnumType) {
+        return domEnumType.getCode().getValue();
+    }
 
-    @NotNull
-    Optional<String> getHybrisDirectory(@NotNull Project project);
+    //literals code will be added here when we find usage for it
 
-    @NotNull
-    Optional<String> getCustomDirectory(@NotNull Project project);
-
-    boolean isHybrisProject(@NotNull Project project);
-
-    boolean isOutDatedHybrisProject(@NotNull Project project);
-
-    boolean isPotentiallyHybrisProject(@NotNull Project project);
 }

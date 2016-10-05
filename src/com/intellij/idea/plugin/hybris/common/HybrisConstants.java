@@ -32,11 +32,13 @@ public interface HybrisConstants {
     String HYBRIS_SERVER_SHELL_SCRIPT_NAME = separatorsToSystem("bin/platform/hybrisserver.sh");
     String PLATFORM_EXT_MODULE_PREFIX = separatorsToSystem("bin/platform/ext/");
     String PLATFORM_OOTB_MODULE_PREFIX = separatorsToSystem("bin/ext-");
+    String HYBRIS_OOTB_MODULE_PREFIX = separatorsToSystem("hybris/")+PLATFORM_OOTB_MODULE_PREFIX;
     String MEDIA_DIRECTORY = separatorsToSystem("/data/media");
     String CUSTOM_MODULES_DIRECTORY_RELATIVE_PATH = separatorsToSystem("bin/custom");
     String EXTENSIONS_XML = "extensions.xml";
     String NEW_IDEA_MODULE_FILE_EXTENSION = ".iml";
     String PLATFORM_EXTENSION_NAME = "platform";
+    String PLATFORM_DB_DRIVER = separatorsToSystem("lib/dbdriver");
     String CORE_EXTENSION_NAME = "core";
     String BACK_OFFICE_EXTENSION_NAME = "backoffice";
     String BACK_OFFICE_MODULE_META_KEY_NAME = "backoffice-module";
@@ -111,13 +113,17 @@ public interface HybrisConstants {
     String HYBRIS_INTEGRATION_SETTINGS_FILE_NAME = "hybrisIntegrationSettings.xml";
 
     String DEFAULT_DIRECTORY_NAME_FOR_IDEA_MODULE_FILES = "idea-module-files";
-    String CONFIGURATOR_FACTORY_ID = "ccom.intellij.idea.plugin.hybris.impex.hybrisConfiguratorFactory";
+    String PLUGIN_ID = "ccom.intellij.idea.plugin.hybris.impex";
+    String CONFIGURATOR_FACTORY_ID = PLUGIN_ID + ".hybrisConfiguratorFactory";
 
     String HYBRIS_ITEMS_XML_FILE_ENDING = "-items.xml";
     String RULESET_XML = "ruleset.xml";
 
     String HMC_WEB_INF_CLASSES = separatorsToSystem("/bin/ext-platform-optional/hmc/web/webroot/WEB-INF/classes");
     String BACKOFFICE_WEB_INF_LIB = separatorsToSystem("/bin/ext-backoffice/backoffice/web/webroot/WEB-INF/lib");
+
+    String DESCRIPTOR_TYPE = "descriptorType";
+    String READ_ONLY = "importedAsReadOnly";
 
     int MAX_EXISTING_MODULE_NAMES = 20;
 

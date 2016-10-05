@@ -32,7 +32,6 @@ import com.intellij.idea.plugin.hybris.indexer.ItemTypesIndexService;
 import com.intellij.idea.plugin.hybris.type.system.meta.TSMetaClass;
 import com.intellij.idea.plugin.hybris.type.system.meta.TSMetaModel;
 import com.intellij.idea.plugin.hybris.type.system.meta.TSMetaModelAccess;
-import com.intellij.idea.plugin.hybris.type.system.meta.TSMetaProperty;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
@@ -58,6 +57,7 @@ import java.util.stream.Stream;
 public class ImpexHeaderItemTypeAttributeNameCompletionProvider extends CompletionProvider<CompletionParameters> {
 
     protected static final boolean GRAYED = true;
+    protected static final String UNNAMED = "<unnamed>";
 
     @NotNull
     public static CompletionProvider<CompletionParameters> getInstance() {
@@ -93,22 +93,28 @@ public class ImpexHeaderItemTypeAttributeNameCompletionProvider extends Completi
         @NotNull final CompletionResultSet resultSet
     ) {
 
-        //FIXME: only direct properties are considered for now, no inheritance
         final TSMetaModel metaModel = TSMetaModelAccess.getInstance(project).getTypeSystemMeta();
         final String itemTypeCode = headerTypeName.getText();
+        final Optional<TSMetaClass> metaClass = Optional.ofNullable(metaModel.findMetaClassByName(itemTypeCode));
 
-        Optional.ofNullable(metaModel.findMetaClassByName(itemTypeCode))
-                .map(TSMetaClass::getPropertiesStream)
-                .orElse(Stream.empty())
-                .filter(dom -> dom.getName() != null)
-                .map(this::createDomLookupElement)
-                .forEach(resultSet::addElement);
+        metaClass
+            .map(meta -> meta.getPropertiesStream(true))
+            .orElse(Stream.empty())
+            .filter(prop -> prop.getName() != null)
+            .map(prop -> createLookup(prop.getName()))
+            .forEach(resultSet::addElement);
+
+        metaClass
+            .map(meta -> meta.getReferenceEndsStream(true))
+            .orElse(Stream.empty())
+            .map(ref -> createLookup(ref.getRole()))
+            .forEach(resultSet::addElement);
     }
 
-    protected LookupElement createDomLookupElement(TSMetaProperty domProperty) {
+    protected LookupElement createLookup(final @Nullable String name) {
         //FIXME: add type
         return LookupElementBuilder
-            .create(Optional.ofNullable(domProperty.getName()).orElse("<unnamed>")) //should not happen
+            .create(Optional.ofNullable(name).orElse("<unnamed>")) //should not happen
             .withIcon(HybrisIcons.TYPE_SYSTEM)
             //.withTypeText(propertyType.getPresentableText(), GRAYED)
             ;

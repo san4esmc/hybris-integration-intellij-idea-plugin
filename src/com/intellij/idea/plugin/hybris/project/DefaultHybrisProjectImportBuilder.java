@@ -25,9 +25,11 @@ import com.intellij.facet.ModifiableFacetModel;
 import com.intellij.framework.FrameworkType;
 import com.intellij.framework.detection.DetectionExcludesConfiguration;
 import com.intellij.framework.detection.impl.FrameworkDetectionUtil;
+import com.intellij.ide.plugins.PluginManager;
 import com.intellij.idea.plugin.hybris.common.services.VirtualFileSystemService;
 import com.intellij.idea.plugin.hybris.impex.ImpexLanguage;
 import com.intellij.idea.plugin.hybris.project.configurators.JavadocModuleConfigurator;
+import com.intellij.idea.plugin.hybris.project.configurators.ModuleSettingsConfigurator;
 import com.intellij.idea.plugin.hybris.project.configurators.impl.DefaultConfiguratorFactory;
 import com.intellij.idea.plugin.hybris.project.configurators.CompilerOutputPathsConfigurator;
 import com.intellij.idea.plugin.hybris.project.configurators.ConfiguratorFactory;
@@ -54,6 +56,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.extensions.ExtensionPoint;
 import com.intellij.openapi.extensions.Extensions;
+import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.module.ModifiableModuleModel;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
@@ -75,6 +78,7 @@ import com.intellij.openapi.roots.ui.configuration.ProjectStructureConfigurable;
 import com.intellij.openapi.roots.ui.configuration.projectRoot.StructureConfigurableContext;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.packaging.artifacts.ModifiableArtifactModel;
 import com.intellij.psi.codeStyle.CodeStyleScheme;
 import com.intellij.psi.codeStyle.CodeStyleSchemes;
@@ -213,6 +217,7 @@ public class DefaultHybrisProjectImportBuilder extends AbstractHybrisProjectImpo
         final SpringConfigurator springConfigurator = configuratorFactory.getSpringConfigurator();
         final GroupModuleConfigurator groupModuleConfigurator = configuratorFactory.getGroupModuleConfigurator();
         final JavadocModuleConfigurator javadocModuleConfigurator = configuratorFactory.getJavadocModuleConfigurator();
+        final ModuleSettingsConfigurator moduleSettingsConfigurator = configuratorFactory.getModuleSettingsConfigurator();
 
         final List<Module> result = new ArrayList<Module>();
 
@@ -250,6 +255,8 @@ public class DefaultHybrisProjectImportBuilder extends AbstractHybrisProjectImpo
             final Module javaModule = rootProjectModifiableModel.newModule(
                 moduleDescriptor.getIdeaModuleFile().getAbsolutePath(), StdModuleTypes.JAVA.getId()
             );
+
+            moduleSettingsConfigurator.configure(moduleDescriptor, javaModule);
 
             if (projectStructureConfigurable.isUiInitialized()) {
                 final StructureConfigurableContext context = projectStructureConfigurable.getContext();
@@ -327,10 +334,14 @@ public class DefaultHybrisProjectImportBuilder extends AbstractHybrisProjectImpo
         final HybrisProjectSettings hybrisProjectSettings = HybrisProjectSettingsComponent.getInstance(project).getState();
         final File customDirectory = this.getHybrisProjectDescriptor().getCustomExtensionsDirectory();
         final File hybrisDirectory = this.getHybrisProjectDescriptor().getHybrisDistributionDirectory();
+        final File baseDirectory = VfsUtilCore.virtualToIoFile(project.getBaseDir());
+        final Path projectPath = Paths.get(baseDirectory.getAbsolutePath());
         final Path customPath = Paths.get(customDirectory.getAbsolutePath());
         final Path hybrisPath = Paths.get(hybrisDirectory.getAbsolutePath());
-        final Path relativePath = hybrisPath.relativize(customPath);
-        hybrisProjectSettings.setCustomDirectory(relativePath.toString());
+        final Path relativeHybrisPath = projectPath.relativize(hybrisPath);
+        final Path relativeCustomPath = hybrisPath.relativize(customPath);
+        hybrisProjectSettings.setHybrisDirectory(relativeHybrisPath.toString());
+        hybrisProjectSettings.setCustomDirectory(relativeCustomPath.toString());
     }
 
     private void selectSdk(@NotNull final Project project) {
@@ -360,6 +371,8 @@ public class DefaultHybrisProjectImportBuilder extends AbstractHybrisProjectImpo
         final HybrisProjectSettings hybrisProjectSettings = HybrisProjectSettingsComponent.getInstance(project).getState();
         if (null != hybrisProjectSettings) {
             hybrisProjectSettings.setHybisProject(true);
+            final String version = PluginManager.getPlugin(PluginId.getId(HybrisConstants.PLUGIN_ID)).getVersion();
+            hybrisProjectSettings.setImportedByVersion(version);
         }
     }
 

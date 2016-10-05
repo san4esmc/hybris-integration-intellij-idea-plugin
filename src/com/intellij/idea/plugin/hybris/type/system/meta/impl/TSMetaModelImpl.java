@@ -18,15 +18,23 @@
 
 package com.intellij.idea.plugin.hybris.type.system.meta.impl;
 
-import com.intellij.idea.plugin.hybris.type.system.model.ItemType;
 import com.intellij.idea.plugin.hybris.type.system.meta.TSMetaClass;
+import com.intellij.idea.plugin.hybris.type.system.meta.TSMetaCollection;
+import com.intellij.idea.plugin.hybris.type.system.meta.TSMetaEnum;
 import com.intellij.idea.plugin.hybris.type.system.meta.TSMetaModel;
+import com.intellij.idea.plugin.hybris.type.system.meta.TSMetaReference;
+import com.intellij.idea.plugin.hybris.type.system.meta.impl.CaseInsensitive.NoCaseMap;
+import com.intellij.idea.plugin.hybris.type.system.meta.impl.CaseInsensitive.NoCaseMultiMap;
+import com.intellij.idea.plugin.hybris.type.system.model.CollectionType;
+import com.intellij.idea.plugin.hybris.type.system.model.EnumType;
+import com.intellij.idea.plugin.hybris.type.system.model.ItemType;
+import com.intellij.idea.plugin.hybris.type.system.model.Relation;
+import com.intellij.openapi.util.text.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.Optional;
-import java.util.TreeMap;
 import java.util.stream.Stream;
 
 /**
@@ -34,7 +42,10 @@ import java.util.stream.Stream;
  */
 class TSMetaModelImpl implements TSMetaModel {
 
-    private final Map<String, TSMetaClassImpl> myClasses = new TreeMap<>();
+    private final NoCaseMap<TSMetaClassImpl> myClasses = new NoCaseMap<>();
+    private final NoCaseMap<TSMetaEnumImpl> myEnums = new NoCaseMap<>();
+    private final NoCaseMap<TSMetaCollectionImpl> myCollections = new NoCaseMap<>();
+    private final NoCaseMultiMap<TSMetaReference.ReferenceEnd> myReferencesBySourceTypeName = new NoCaseMultiMap<>();
 
     @Nullable
     TSMetaClassImpl findOrCreateClass(final @NotNull ItemType domItemType) {
@@ -52,10 +63,65 @@ class TSMetaModelImpl implements TSMetaModel {
         return impl;
     }
 
-    @NotNull
-    @Override
-    public Iterable<? extends TSMetaClass> getMetaClasses() {
-        return myClasses.values();
+    @Nullable
+    TSMetaEnumImpl findOrCreateEnum(final @NotNull EnumType domEnumType) {
+        final String name = TSMetaEnumImpl.extractName(domEnumType);
+        if (StringUtil.isEmpty(name)) {
+            return null;
+        }
+        TSMetaEnumImpl impl = myEnums.get(name);
+        if (impl == null) {
+            impl = new TSMetaEnumImpl(name, domEnumType);
+            myEnums.put(name, impl);
+        } else {
+            //report a problem
+        }
+        return impl;
+    }
+
+    @Nullable
+    TSMetaCollectionImpl findOrCreateCollection(@NotNull final CollectionType domCollectionType) {
+        final String name = TSMetaCollectionImpl.extractName(domCollectionType);
+        if (StringUtil.isEmpty(name)) {
+            return null;
+        }
+        TSMetaCollectionImpl impl = myCollections.get(name);
+        if (impl == null) {
+            impl = new TSMetaCollectionImpl(this, domCollectionType);
+            myCollections.put(name, impl);
+        }
+        return impl;
+    }
+
+    @Nullable
+    TSMetaReference createReference(@NotNull final Relation domRelation) {
+        final TSMetaReferenceImpl result = new TSMetaReferenceImpl(this, domRelation);
+
+        registerReferenceEnd(result.getSource(), result.getTarget());
+        registerReferenceEnd(result.getTarget(), result.getSource());
+
+        return result;
+    }
+
+    private void registerReferenceEnd(
+        @NotNull final TSMetaReference.ReferenceEnd ownerEnd,
+        @NotNull final TSMetaReference.ReferenceEnd targetEnd
+    ) {
+        if (!targetEnd.isNavigable()) {
+            return;
+        }
+        final String ownerTypeName = ownerEnd.getTypeName();
+        if (!StringUtil.isEmpty(ownerTypeName)) {
+            myReferencesBySourceTypeName.putValue(ownerTypeName, targetEnd);
+        }
+    }
+
+    void collectReferencesForSourceType(
+        final @NotNull TSMetaClassImpl source,
+        final @NotNull Collection<TSMetaReference.ReferenceEnd> out
+    ) {
+
+        out.addAll(myReferencesBySourceTypeName.get(source.getName()));
     }
 
     @NotNull
@@ -77,4 +143,30 @@ class TSMetaModelImpl implements TSMetaModel {
                        .map(this::findMetaClassByName)
                        .orElse(null);
     }
+
+    @NotNull
+    @Override
+    public Stream<? extends TSMetaEnum> getMetaEnumsStream() {
+        return myEnums.values().stream();
+    }
+
+    @Nullable
+    @Override
+    public TSMetaEnum findMetaEnumByName(@NotNull final String name) {
+        return myEnums.get(name);
+    }
+
+    @NotNull
+    @Override
+    public Stream<? extends TSMetaCollection> getMetaCollectionsStream() {
+        return myCollections.values().stream();
+    }
+
+    @Nullable
+    @Override
+    public TSMetaCollection findMetaCollectionByName(@NotNull final String name) {
+        return myCollections.get(name);
+    }
+
+
 }

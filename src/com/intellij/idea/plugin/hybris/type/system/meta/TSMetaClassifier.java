@@ -16,32 +16,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.intellij.idea.plugin.hybris.common.services;
+package com.intellij.idea.plugin.hybris.type.system.meta;
 
+import com.intellij.util.xml.DomElement;
 
-import com.intellij.openapi.project.Project;
-import org.jetbrains.annotations.NotNull;
+public interface TSMetaClassifier<DOM extends DomElement> {
 
-import java.util.Optional;
+    String getName();
 
-/**
- * Created 10:20 PM 10 February 2016.
- *
- * @author Alexander Bartash <AlexanderBartash@gmail.com>
- */
-public interface CommonIdeaService {
+    DOM getDom();
 
-    boolean isTypingActionInProgress();
-
-    @NotNull
-    Optional<String> getHybrisDirectory(@NotNull Project project);
-
-    @NotNull
-    Optional<String> getCustomDirectory(@NotNull Project project);
-
-    boolean isHybrisProject(@NotNull Project project);
-
-    boolean isOutDatedHybrisProject(@NotNull Project project);
-
-    boolean isPotentiallyHybrisProject(@NotNull Project project);
 }
