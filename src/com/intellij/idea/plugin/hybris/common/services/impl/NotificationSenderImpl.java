@@ -37,9 +37,12 @@ import org.jetbrains.annotations.NotNull;
 public class NotificationSenderImpl implements NotificationSender {
 
     private NotificationGroup group;
+    private Project project;
 
-    public NotificationSenderImpl(@NotNull final NotificationGroup group) {
+    public NotificationSenderImpl(@NotNull final NotificationGroup group,
+                                  @NotNull final Project project) {
         this.group = group;
+        this.project = project;
     }
 
     @Override
@@ -70,9 +73,6 @@ public class NotificationSenderImpl implements NotificationSender {
 
         ApplicationManager.getApplication().invokeLater(() -> {
             final Notification notification = this.group.createNotification(message, messageLevel);
-
-            final CommonIdeaService commonIdeaService = ServiceManager.getService(CommonIdeaService.class);
-            final Project project = commonIdeaService.getProject();
 
             Notifications.Bus.notify(notification, project);
         });

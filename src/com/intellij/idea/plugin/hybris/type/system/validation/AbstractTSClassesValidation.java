@@ -81,7 +81,11 @@ public abstract class AbstractTSClassesValidation<T, M> {
         final List<PsiClass> filteredItemClasses = new ArrayList<>();
         for (final T item : itemsToFind) {
             modelName = this.buildGeneratedClassName(item);
-            filteredItemClasses.add(classesToFilter.get(modelName));
+
+            if(null!=classesToFilter.get(modelName))
+            {
+                filteredItemClasses.add(classesToFilter.get(modelName));
+            }
 
         }
 
