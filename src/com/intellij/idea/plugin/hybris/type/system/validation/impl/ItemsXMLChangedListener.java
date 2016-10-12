@@ -18,191 +18,91 @@
 
 package com.intellij.idea.plugin.hybris.type.system.validation.impl;
 
-import com.intellij.idea.plugin.hybris.common.HybrisConstants;
-import com.intellij.idea.plugin.hybris.common.services.NotificationSender;
-import com.intellij.idea.plugin.hybris.common.services.impl.NotificationSenderImpl;
-import com.intellij.idea.plugin.hybris.common.utils.HybrisI18NBundleUtils;
-import com.intellij.idea.plugin.hybris.type.system.common.TSMessages;
-import com.intellij.idea.plugin.hybris.type.system.model.EnumType;
-import com.intellij.idea.plugin.hybris.type.system.model.ItemType;
-import com.intellij.idea.plugin.hybris.type.system.model.Items;
-import com.intellij.idea.plugin.hybris.type.system.model.Relation;
-import com.intellij.idea.plugin.hybris.type.system.validation.TSRelationsValidation;
-import com.intellij.notification.NotificationDisplayType;
-import com.intellij.notification.NotificationGroup;
-import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.idea.plugin.hybris.settings.HybrisApplicationSettingsComponent;
+import com.intellij.idea.plugin.hybris.type.system.validation.ItemsFileValidation;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerAdapter;
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManagerListener;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileAdapter;
 import com.intellij.openapi.vfs.VirtualFileEvent;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import com.intellij.psi.JavaPsiFacade;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
-import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.search.searches.ClassInheritorsSearch;
-import com.intellij.psi.xml.XmlFile;
-import com.intellij.util.containers.HashMap;
 import com.intellij.util.messages.MessageBus;
-import com.intellij.util.xml.DomFileElement;
-import com.intellij.util.xml.DomManager;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import static com.intellij.idea.plugin.hybris.common.HybrisConstants.ITEMS_XML_FILE;
-import static com.intellij.idea.plugin.hybris.common.HybrisConstants.ITEM_ROOT_CLASS;
 
 /**
  * @author Vlad Bozhenok <vladbozhenok@gmail.com>
  */
 public class ItemsXMLChangedListener implements ProjectManagerListener {
 
-    private static final Logger LOG = Logger.getInstance(ItemsXMLChangedListener.class);
 
-    private static final String ITEM_XML_VALIDATION_GROUP = "Items XML validation group";
-
-    private static final NotificationGroup NOTIFICATION_GROUP = new NotificationGroup(
-        ITEM_XML_VALIDATION_GROUP, NotificationDisplayType.BALLOON, true
-    );
-
-    private static final ItemTypeClassValidation ITEM_TYPE_VALIDATION = new ItemTypeClassValidation();
-    private static final EnumTypeClassValidation ENUM_TYPE_VALIDATION = new EnumTypeClassValidation();
-    private static final TSRelationsValidation RELATIONS_VALIDATION = new DefaultTSRelationValidation();
+    private SaveItemXmlFileListener saveItemXmlFileListener;
 
     protected class ItemsFileSelectedListener extends FileEditorManagerAdapter {
 
-        private Project project;
-        private NotificationSender NOTIFICATIONS;
+        private ItemsFileValidation validator;
 
         public ItemsFileSelectedListener(final Project project) {
             super();
-            this.project = project;
-            NOTIFICATIONS = new NotificationSenderImpl(NOTIFICATION_GROUP, project);
+            this.validator = new DefaultItemsFileValidation(project);
         }
 
         @Override
         public void fileOpened(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
             super.fileOpened(source, file);
-            this.validateItemFile(file);
+            this.validator.validateItemFile(file);
 
         }
 
         @Override
         public void selectionChanged(@NotNull FileEditorManagerEvent event) {
             super.selectionChanged(event);
-            this.validateItemFile(event.getNewFile());
+            this.validator.validateItemFile(event.getNewFile());
 
         }
 
-        private void validateItemFile(@NotNull final VirtualFile file)
+    }
+
+    protected class SaveItemXmlFileListener extends VirtualFileAdapter
+    {
+
+        private ItemsFileValidation validator;
+
+        public SaveItemXmlFileListener(final Project project) {
+            super();
+            this.validator = new DefaultItemsFileValidation(project);
+        }
+
+        @Override
+        public void contentsChanged(VirtualFileEvent event)
         {
-            if (!file.getName().endsWith(ITEMS_XML_FILE)) {
+            if(!HybrisApplicationSettingsComponent.getInstance().getState().isValidateGeneratedItemsOnSave())
+            {
                 return;
             }
-            try {
-
-                final DomManager domManager = DomManager.getDomManager(this.project);
-
-                final PsiManager psiManager = PsiManager.getInstance(this.project);
-                final PsiFile psiFile = psiManager.findFile(file);
-
-                if (psiFile != null && (psiFile instanceof XmlFile)) {
-                    final DomFileElement<Items> fileElement = domManager.getFileElement((XmlFile) psiFile, Items.class);
-                    if (null == fileElement) {
-                        return;
-                    }
-
-                    final Items itemsRootElement = fileElement.getRootElement();
-
-                    final Map<String, PsiClass> inheritedItemClasses = ItemsXMLChangedListener.this.findAllInheritClasses(
-                        this.project, ITEM_ROOT_CLASS
-                    );
-                    final Map<String, PsiClass> inheritedEnumClasses = ItemsXMLChangedListener.this.findAllInheritClasses(
-                        this.project, HybrisConstants.ENUM_ROOT_CLASS
-                    );
-
-                    final List<EnumType> enumTypeList = itemsRootElement.getEnumTypes().getEnumTypes();
-                    final String enumValidationMessage = ENUM_TYPE_VALIDATION.validateGeneratedClasses(
-                        enumTypeList,
-                        inheritedEnumClasses
-                    );
-                    NOTIFICATIONS.showWarningMessage(enumValidationMessage);
-
-                    final List<ItemType> itemTypeList = itemsRootElement.getItemTypes().getItemTypes();
-                    final String itemsValidationMessage = ITEM_TYPE_VALIDATION.validateGeneratedClasses(
-                        itemTypeList,
-                        inheritedItemClasses
-                    );
-                    NOTIFICATIONS.showWarningMessage(itemsValidationMessage);
-
-                    final List<Relation> relationsList = itemsRootElement.getRelations().getRelations();
-                    final String relationsValidationMessage = RELATIONS_VALIDATION.validateRelations(
-                        inheritedItemClasses,
-                        relationsList
-                    );
-                    NOTIFICATIONS.showWarningMessage(relationsValidationMessage);
-
-                    if (StringUtils.isNotEmpty(enumValidationMessage)
-                        || StringUtils.isNotEmpty(itemsValidationMessage)
-                        || StringUtils.isNotEmpty(relationsValidationMessage)) {
-                        NOTIFICATIONS.showWarningMessage(HybrisI18NBundleUtils.message(TSMessages.RUN_ANT_CLEAN_ALL));
-                    }
-                }
-            } catch (IndexNotReadyException ignore)
+            super.contentsChanged(event);
+            if (!event.getFileName().endsWith(ITEMS_XML_FILE))
             {
-                //do not validate Items.xml until index is not ready
+                return;
             }
-            catch (Exception e)
-            {
-                LOG.error(String.format("Items validation error. File: %s", file.getName()), e);
-            }
+            this.validator.validateItemFile(event.getFile());
         }
     }
 
-
-    @NotNull
-    private Map<String, PsiClass> findAllInheritClasses(
-        @NotNull final Project project,
-        @NotNull final String rootClass
-    ) {
-        Validate.notNull(project);
-        Validate.notNull(rootClass);
-
-        final PsiClass itemRootClass = JavaPsiFacade.getInstance(project).findClass(
-            rootClass, GlobalSearchScope.allScope(project));
-
-        if (null == itemRootClass) {
-            return Collections.emptyMap();
-        }
-
-        final Collection<PsiClass> foundClasses = ClassInheritorsSearch.search(itemRootClass).findAll();
-        final Map<String, PsiClass> result = new HashMap<>();
-        for (final PsiClass psiClass : foundClasses) {
-            result.put(psiClass.getName(), psiClass);
-        }
-        return result;
-
-    }
 
     @Override
     public void projectOpened(final Project project)
     {
         final  MessageBus messageBus = project.getMessageBus();
         messageBus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new ItemsFileSelectedListener(project));
+
+        saveItemXmlFileListener =  new SaveItemXmlFileListener(project);
+        VirtualFileManager.getInstance().addVirtualFileListener(saveItemXmlFileListener);
 
     }
 
@@ -212,7 +112,9 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
     }
 
     @Override
-    public void projectClosed(final Project project) {
+    public void projectClosed(final Project project)
+    {
+        VirtualFileManager.getInstance().removeVirtualFileListener(saveItemXmlFileListener);
     }
 
     @Override

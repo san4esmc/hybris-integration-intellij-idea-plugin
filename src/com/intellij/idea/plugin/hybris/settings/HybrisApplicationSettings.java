@@ -86,6 +86,9 @@ public class HybrisApplicationSettings {
     @PropertyName("createBackwardCyclicDependenciesForAddOns")
     private boolean createBackwardCyclicDependenciesForAddOns = false;
 
+    @PropertyName("validateGeneratedItemsOnSave")
+    private boolean validateGeneratedItemsOnSave = false;
+
 
     public HybrisApplicationSettings() {
     }
@@ -186,6 +189,14 @@ public class HybrisApplicationSettings {
         this.createBackwardCyclicDependenciesForAddOns = createBackwardCyclicDependenciesForAddOns;
     }
 
+    public boolean isValidateGeneratedItemsOnSave() {
+        return validateGeneratedItemsOnSave;
+    }
+
+    public void setValidateGeneratedItemsOnSave(final boolean validateGeneratedItemsOnSave) {
+        this.validateGeneratedItemsOnSave = validateGeneratedItemsOnSave;
+    }
+
     public String getGroupPlatform() {
         return groupPlatform;
     }
@@ -220,6 +231,7 @@ public class HybrisApplicationSettings {
             .append(hideEmptyMiddleFolders, other.hideEmptyMiddleFolders)
             .append(defaultPlatformInReadOnly, other.defaultPlatformInReadOnly)
             .append(createBackwardCyclicDependenciesForAddOns, other.createBackwardCyclicDependenciesForAddOns)
+            .append(validateGeneratedItemsOnSave, other.validateGeneratedItemsOnSave)
             .isEquals();
     }
 
@@ -239,6 +251,7 @@ public class HybrisApplicationSettings {
             .append(hideEmptyMiddleFolders)
             .append(defaultPlatformInReadOnly)
             .append(createBackwardCyclicDependenciesForAddOns)
+            .append(validateGeneratedItemsOnSave)
             .toHashCode();
     }
 
@@ -258,6 +271,7 @@ public class HybrisApplicationSettings {
         sb.append(", hideEmptyMiddleFolders='").append(hideEmptyMiddleFolders).append('\'');
         sb.append(", defaultPlatformInReadOnly='").append(defaultPlatformInReadOnly).append('\'');
         sb.append(", createBackwardCyclicDependenciesForAddOns='").append(createBackwardCyclicDependenciesForAddOns).append('\'');
+        sb.append(", validateGeneratedItemsOnSave='").append(validateGeneratedItemsOnSave).append('\'');
         sb.append('}');
         return sb.toString();
     }

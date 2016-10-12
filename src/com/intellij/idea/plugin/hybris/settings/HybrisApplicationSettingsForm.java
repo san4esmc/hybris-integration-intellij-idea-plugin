@@ -61,6 +61,8 @@ public class HybrisApplicationSettingsForm {
     private JCheckBox defaultPlatformInReadOnly;
     private JTextField groupPlatformTextField;
     private JCheckBox createBackwardCyclicDependenciesForAddOns;
+    private JLabel typeSystemLabel;
+    private JCheckBox validateGeneratedItemsOnSaveCheckBox;
 
     private JunkListPanel junkListPanel;
 
@@ -78,6 +80,7 @@ public class HybrisApplicationSettingsForm {
         hideEmptyMiddleFoldersCheckBox.setSelected(data.isHideEmptyMiddleFolders());
         defaultPlatformInReadOnly.setSelected(data.isDefaultPlatformInReadOnly());
         createBackwardCyclicDependenciesForAddOns.setSelected(data.isCreateBackwardCyclicDependenciesForAddOns());
+        validateGeneratedItemsOnSaveCheckBox.setSelected(data.isValidateGeneratedItemsOnSave());
     }
 
     public void getData(final HybrisApplicationSettings data) {
@@ -94,6 +97,7 @@ public class HybrisApplicationSettingsForm {
         data.setHideEmptyMiddleFolders(hideEmptyMiddleFoldersCheckBox.isSelected());
         data.setDefaultPlatformInReadOnly(defaultPlatformInReadOnly.isSelected());
         data.setCreateBackwardCyclicDependenciesForAddOns(createBackwardCyclicDependenciesForAddOns.isSelected());
+        data.setValidateGeneratedItemsOnSave(validateGeneratedItemsOnSaveCheckBox.isSelected());
     }
 
     public boolean isModified(final HybrisApplicationSettings data) {
@@ -136,6 +140,9 @@ public class HybrisApplicationSettingsForm {
         if (createBackwardCyclicDependenciesForAddOns.isSelected() != data.isCreateBackwardCyclicDependenciesForAddOns()) {
             return true;
         }
+        if (validateGeneratedItemsOnSaveCheckBox.isSelected() != data.isValidateGeneratedItemsOnSave()) {
+            return true;
+        }
         return false;
     }
 
@@ -157,6 +164,9 @@ public class HybrisApplicationSettingsForm {
 
         projectTreeViewSettingsLabel = new JBLabel();
         projectTreeViewSettingsLabel.setBorder(IdeBorderFactory.createTitledBorder(HybrisI18NBundleUtils.message("hybris.project.view.tree.settings")));
+
+        typeSystemLabel = new JBLabel();
+        typeSystemLabel.setBorder(IdeBorderFactory.createTitledBorder(HybrisI18NBundleUtils.message("hybris.import.settings.type.system.section")));
     }
 
     public void createComponent() {
