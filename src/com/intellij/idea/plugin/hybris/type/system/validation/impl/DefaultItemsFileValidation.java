@@ -69,6 +69,7 @@ public class DefaultItemsFileValidation implements ItemsFileValidation {
     private static final TSRelationsValidation RELATIONS_VALIDATION = new DefaultTSRelationValidation();
 
     private static final String ITEM_XML_VALIDATION_GROUP = "Items XML validation group";
+    private static final String NEW_LINE = "<br><br>";
 
     private static final NotificationGroup NOTIFICATION_GROUP = new NotificationGroup(
         ITEM_XML_VALIDATION_GROUP, NotificationDisplayType.BALLOON, true
@@ -112,31 +113,33 @@ public class DefaultItemsFileValidation implements ItemsFileValidation {
                     this.project, HybrisConstants.ENUM_ROOT_CLASS
                 );
 
+                final StringBuilder sb = new StringBuilder();
+
                 final List<EnumType> enumTypeList = itemsRootElement.getEnumTypes().getEnumTypes();
                 final String enumValidationMessage = ENUM_TYPE_VALIDATION.validateGeneratedClasses(
                     enumTypeList,
                     inheritedEnumClasses
                 );
-                notifications.showWarningMessage(enumValidationMessage);
+                sb.append(enumValidationMessage);
 
                 final List<ItemType> itemTypeList = itemsRootElement.getItemTypes().getItemTypes();
                 final String itemsValidationMessage = ITEM_TYPE_VALIDATION.validateGeneratedClasses(
                     itemTypeList,
                     inheritedItemClasses
                 );
-                notifications.showWarningMessage(itemsValidationMessage);
+                sb.append(itemsValidationMessage);
 
                 final List<Relation> relationsList = itemsRootElement.getRelations().getRelations();
                 final String relationsValidationMessage = RELATIONS_VALIDATION.validateRelations(
                     inheritedItemClasses,
                     relationsList
                 );
-                notifications.showWarningMessage(relationsValidationMessage);
+                sb.append(relationsValidationMessage);
 
-                if (StringUtils.isNotEmpty(enumValidationMessage)
-                    || StringUtils.isNotEmpty(itemsValidationMessage)
-                    || StringUtils.isNotEmpty(relationsValidationMessage)) {
-                    notifications.showWarningMessage(HybrisI18NBundleUtils.message(TSMessages.RUN_ANT_CLEAN_ALL));
+                if (StringUtils.isNotBlank(sb.toString())) {
+                    sb.append(NEW_LINE);
+                    sb.append(HybrisI18NBundleUtils.message(TSMessages.RUN_ANT_CLEAN_ALL));
+                    notifications.showWarningMessage(sb.toString());
                 }
             }
         } catch (IndexNotReadyException ignore)
@@ -148,6 +151,7 @@ public class DefaultItemsFileValidation implements ItemsFileValidation {
             LOG.error(String.format("Items validation error. File: %s", file.getName()), e);
         }
     }
+
 
     @NotNull
     private Map<String, PsiClass> findAllInheritClasses(
