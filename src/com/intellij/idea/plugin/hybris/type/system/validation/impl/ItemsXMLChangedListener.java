@@ -62,14 +62,13 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
         @Override
         public void selectionChanged(@NotNull FileEditorManagerEvent event) {
             super.selectionChanged(event);
-            this.validator.validateItemFile(event.getNewFile());
-
+            if (null != event.getNewFile()) {
+                this.validator.validateItemFile(event.getNewFile());
+            }
         }
-
     }
 
-    protected class SaveItemXmlFileListener extends VirtualFileAdapter
-    {
+    protected class SaveItemXmlFileListener extends VirtualFileAdapter {
 
         private ItemsFileValidation validator;
 
@@ -79,15 +78,12 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
         }
 
         @Override
-        public void contentsChanged(VirtualFileEvent event)
-        {
-            if(!HybrisApplicationSettingsComponent.getInstance().getState().isValidateGeneratedItemsOnSave())
-            {
+        public void contentsChanged(VirtualFileEvent event) {
+            if (!HybrisApplicationSettingsComponent.getInstance().getState().isValidateGeneratedItemsOnSave()) {
                 return;
             }
             super.contentsChanged(event);
-            if (!event.getFileName().endsWith(ITEMS_XML_FILE))
-            {
+            if (!event.getFileName().endsWith(ITEMS_XML_FILE)) {
                 return;
             }
             this.validator.validateItemFile(event.getFile());
@@ -96,12 +92,14 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
 
 
     @Override
-    public void projectOpened(final Project project)
-    {
-        final  MessageBus messageBus = project.getMessageBus();
-        messageBus.connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new ItemsFileSelectedListener(project));
+    public void projectOpened(final Project project) {
+        final MessageBus messageBus = project.getMessageBus();
+        messageBus.connect().subscribe(
+            FileEditorManagerListener.FILE_EDITOR_MANAGER,
+            new ItemsFileSelectedListener(project)
+        );
 
-        saveItemXmlFileListener =  new SaveItemXmlFileListener(project);
+        saveItemXmlFileListener = new SaveItemXmlFileListener(project);
         VirtualFileManager.getInstance().addVirtualFileListener(saveItemXmlFileListener);
 
     }
@@ -112,8 +110,7 @@ public class ItemsXMLChangedListener implements ProjectManagerListener {
     }
 
     @Override
-    public void projectClosed(final Project project)
-    {
+    public void projectClosed(final Project project) {
         VirtualFileManager.getInstance().removeVirtualFileListener(saveItemXmlFileListener);
     }
 
